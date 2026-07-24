@@ -34,6 +34,23 @@ jobs:
           done
           exit $rc
 
+      - name: hooks.json tem a estrutura que o Claude Code espera
+        run: |
+          rc=0
+          # Os eventos precisam estar aninhados sob a chave "hooks" — no topo, são ignorados.
+          jq -e '.hooks | objects' hooks/hooks.json >/dev/null || {
+            echo "hooks/hooks.json: falta a chave de topo \"hooks\""; rc=1;
+          }
+          for k in $(jq -r 'keys[]' hooks/hooks.json); do
+            [ "$k" = "hooks" ] || { echo "chave inesperada no topo: $k"; rc=1; }
+          done
+          # Todo arquivo referenciado via CLAUDE_PLUGIN_ROOT precisa existir.
+          for f in $(jq -r '[.. | .command? // empty] | .[]' hooks/hooks.json \
+                     | grep -o '\${CLAUDE_PLUGIN_ROOT}/[^"]*' | sed 's#${CLAUDE_PLUGIN_ROOT}/##'); do
+            test -f "$f" || { echo "hook referencia arquivo inexistente: $f"; rc=1; }
+          done
+          exit $rc
+
       - name: Agentes mantêm a integração com o caveman
         run: |
           rc=0
