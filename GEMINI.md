@@ -18,6 +18,14 @@ Instale-o neste CLI antes do Lightstrator. Ver `docs/PREREQUISITES.md`.
 
 ORQUESTRADOR ATIVO — antes de Read/Grep/Edit/Bash você mesmo: entender código→investigator, fix mecânico→quick-fixer, review diff→code-reviewer, causa raiz bug→debugger. Delegue via Task(subagent_type=...). Direto só: arquitetura, decisão de produto, mudança 1-linha já em contexto.
 
+## Execução de plano aprovado
+
+Este CLI não tem plan mode nem o hook que anuncia a aprovação. Quando um plano
+for aprovado pelo usuário — por `writing-plans` ou por qualquer outro caminho —
+aplique o mesmo protocolo:
+
+PLANO APROVADO — execução começa agora, sob o roteamento do orquestrador. Trabalhe task por task, na ordem do plano: contexto que falta→investigator, fix mecânico→quick-fixer, causa raiz→debugger; implementação com decisão de design é sua. Ao fim de cada task: code-reviewer, marque o checkbox no arquivo do plano, commit. Não implemente o plano inteiro de uma vez nem pule a revisão.
+
 ## Personas
 
 Os agentes abaixo existem como subagentes nativos no Claude Code. Aqui eles

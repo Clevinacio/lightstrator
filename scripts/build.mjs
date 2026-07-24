@@ -69,7 +69,7 @@ const readMessage = (name) => read(join('hooks', 'messages', `${name}.md`)).trim
  * Arquivo de contexto para CLIs sem subagentes nem (necessariamente) hooks.
  * Serve tanto ao Codex/Antigravity (AGENTS.md) quanto ao Gemini (GEMINI.md).
  */
-function buildContextFile({ skills, agents, orquestrador }) {
+function buildContextFile({ skills, agents, orquestrador, planoAprovado }) {
   const imports = skills.map((s) => `@./skills/${s}/SKILL.md`).join('\n');
 
   const personas = agents
@@ -101,6 +101,14 @@ Instale-o neste CLI antes do Lightstrator. Ver \`docs/PREREQUISITES.md\`.
 ## Roteamento obrigatório
 
 ${orquestrador}
+
+## Execução de plano aprovado
+
+Este CLI não tem plan mode nem o hook que anuncia a aprovação. Quando um plano
+for aprovado pelo usuário — por \`writing-plans\` ou por qualquer outro caminho —
+aplique o mesmo protocolo:
+
+${planoAprovado}
 
 ## Personas
 
@@ -145,6 +153,7 @@ function build() {
     skills: listSkills(),
     agents: readAgents(),
     orquestrador: readMessage('orquestrador'),
+    planoAprovado: readMessage('plano-aprovado'),
   });
 
   // Propaga a versão para os manifests canônicos.

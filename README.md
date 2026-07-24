@@ -52,23 +52,58 @@ processo. Código, caminhos, comandos e mensagens de erro ficam exatos.
 
 ### Hooks
 
-Dois lembretes injetados a cada prompt: o roteamento do orquestrador (sempre) e
-a sequência brainstorming → writing-plans (só em plan mode).
+Três injeções de contexto: o roteamento do orquestrador (a cada prompt), a
+sequência brainstorming → writing-plans (só em plan mode) e o handoff de
+execução (ao aprovar um plano, via `PostToolUse` em `ExitPlanMode`).
 
 ### Opcionais
 
 `optional/statusline-limit.sh` (uso dos limites de 5h e semanal na statusline) e
 `optional/rules.md` (regras globais que acompanham o harness).
 
-## Fluxo típico
+## Fluxo principal: plan mode → plano → execução
+
+O caminho para qualquer trabalho não-trivial é sempre o mesmo. Cada seta é
+garantida por um hook ou por uma skill, não pela boa vontade do modelo.
+
+```
+plan mode ──▶ brainstorming ──▶ writing-plans ──▶ ExitPlanMode ──▶ orquestrador
+   │              │                   │                │               │
+   hook       design por          plano com        aprovação        execução
+plan-mode      diálogo          tasks e steps      do usuário     task a task
+```
+
+**1. Entra em plan mode.** O hook injeta o lembrete: brainstorming antes de
+qualquer plano.
+
+**2. `brainstorming`.** Uma pergunta por vez até o design fechar. Nada de
+código antes da sua aprovação.
+
+**3. `writing-plans`.** Escreve o plano em tasks pequenas, cada uma com
+arquivos exatos, código e comando de verificação. Em plan mode o plano vai para
+o plan file da sessão; fora dele, para `docs/superpowers/plans/`. O caminho é
+anunciado — a execução começa lendo esse arquivo.
+
+**4. Você aprova** via `ExitPlanMode`. A sessão sai para auto mode e o hook
+`PostToolUse` injeta o handoff.
+
+**5. `orquestrador` executa.** Uma task por vez: lê a task, busca contexto
+faltante com o `investigator` (ou pula, se o plano já trouxe), implementa,
+manda fix mecânico para o `quick-fixer`, chama o `debugger` quando um step
+falha de forma inesperada, roda a verificação, passa o `code-reviewer`, marca
+o checkbox e commita. Só então vai para a próxima.
+
+Se uma task não bater com o código real, a execução para e te consulta — o
+plano não é corrigido em silêncio.
+
+## Outros fluxos
 
 **Corrigir um bug:** `debugger` acha a causa raiz → correção trivial vai para o
 `quick-fixer`, correção com decisão de design fica com o agente principal →
 `code-reviewer` revisa antes de fechar.
 
-**Implementar uma feature:** `brainstorming` fecha o design com você →
-`writing-plans` escreve o plano → o agente principal implementa com o contexto
-que o `investigator` mapeou → `code-reviewer` revisa.
+**Tarefa pequena, sem plano:** `investigator` mapeia o contexto → o agente
+principal implementa → `code-reviewer` revisa.
 
 ## Desenvolvimento
 

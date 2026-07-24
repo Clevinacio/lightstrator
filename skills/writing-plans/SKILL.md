@@ -19,8 +19,15 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 
 **Announce at start:** "I'm using the writing-plans skill to create the implementation plan."
 
-**Save plans to:** `docs/superpowers/plans/YYYY-MM-DD-<feature-name>.md`
-- (User preferences for plan location override this default)
+**Where to save the plan:**
+- **In plan mode**, write to the plan file the harness assigned for this session
+  (in Claude Code, `~/.claude/plans/<slug>.md` — it is the only file you are
+  allowed to edit while planning). Do NOT create a second copy elsewhere.
+- **Outside plan mode**, save to `docs/superpowers/plans/YYYY-MM-DD-<feature-name>.md`.
+- (User preferences for plan location override both defaults.)
+
+Whichever path applies, state it explicitly when you hand off — execution
+starts by reading that file.
 
 ## Scope Check
 
@@ -159,4 +166,15 @@ If you find issues, fix them inline. No need to re-review — just fix and move 
 
 ## Execution Handoff
 
-After saving the plan, announce: "Plan complete and saved to `docs/superpowers/plans/<filename>.md`." Then present the plan for user approval (in plan mode, via ExitPlanMode). Execution happens in-session after approval, delegating tasks to sub-agents per the orquestrador routing.
+After saving the plan, announce where it lives — the exact path, since
+execution starts by reading that file. Then present the plan for user approval
+(in plan mode, via ExitPlanMode).
+
+Approval ends this skill. Execution happens in-session, immediately after, and
+belongs to the **orquestrador** skill: invoke it and follow its "Execução de
+plano aprovado" section — one task at a time, delegating to `investigator`,
+`quick-fixer` and `debugger` as each task calls for it, running
+`code-reviewer` and ticking the checkboxes before moving on.
+
+Do not start implementing straight from this skill, and do not implement the
+whole plan in one pass.
