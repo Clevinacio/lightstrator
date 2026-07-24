@@ -34,8 +34,15 @@ proteger.
 Invoque explicitamente, não deixe implícito:
 
 ```
-Task(subagent_type="investigator", prompt="Mapear onde a autenticação de sessão está implementada e quais padrões o projeto já usa para middlewares.")
+Task(subagent_type="lightstrator:investigator", prompt="Mapear onde a autenticação de sessão está implementada e quais padrões o projeto já usa para middlewares.")
 ```
+
+**Nome do subagente.** Instalados via plugin, os quatro recebem o prefixo do
+plugin: `lightstrator:investigator`, `lightstrator:quick-fixer`,
+`lightstrator:code-reviewer`, `lightstrator:debugger` — e é assim que precisam
+ser invocados; sem o prefixo o tipo não existe. Se os arquivos tiverem sido
+copiados à mão para `~/.claude/agents/`, aí valem os nomes sem prefixo. Na
+dúvida, use o nome que aparece na lista de subagentes disponíveis da sessão.
 
 Depois de cada delegação, incorpore o resultado no seu raciocínio antes de
 prosseguir — não repita o trabalho que o sub-agent já fez.
