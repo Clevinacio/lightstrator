@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Artefatos gerados estão em dia
+        run: node scripts/build.mjs --check
+
+      - name: JSON válido
+        run: |
+          rc=0
+          for f in $(git ls-files '*.json'); do
+            jq empty "$f" || { echo "INVÁLIDO: $f"; rc=1; }
+          done
+          exit $rc
+
+      - name: Shell scripts sem erro de sintaxe
+        run: |
+          rc=0
+          for f in $(git ls-files '*.sh'); do
+            bash -n "$f" || { echo "SINTAXE: $f"; rc=1; }
+          done
+          exit $rc
+
+      - name: Agentes mantêm a integração com o caveman
+        run: |
+          rc=0
+          for f in agents/*.md; do
+            grep -q "skill caveman" "$f" || { echo "SEM REFERÊNCIA AO CAVEMAN: $f"; rc=1; }
+          done
+          grep -q "caveman-review" agents/code-reviewer.md || {
+            echo "code-reviewer perdeu o formato /caveman-review"; rc=1;
+          }
+          exit $rc
