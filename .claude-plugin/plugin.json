@@ -4,10 +4,10 @@
   "description": "Harness de orquestração: subagentes especializados, roteamento obrigatório e fluxo brainstorm → plano. Requer o plugin caveman.",
   "author": {
     "name": "Cleverton Inacio",
-    "url": "https://github.com/clevinacio"
+    "url": "https://github.com/Clevinacio"
   },
-  "homepage": "https://github.com/clevinacio/lightstrator",
-  "repository": "https://github.com/clevinacio/lightstrator",
+  "homepage": "https://github.com/Clevinacio/lightstrator",
+  "repository": "https://github.com/Clevinacio/lightstrator",
   "license": "MIT",
   "keywords": [
     "orchestration",
@@ -17,6 +17,5 @@
     "debugging",
     "caveman",
     "pt-br"
-  ],
-  "hooks": "./hooks/hooks.json"
+  ]
 }

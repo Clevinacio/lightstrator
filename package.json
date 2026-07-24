@@ -5,10 +5,10 @@
   "license": "MIT",
   "type": "module",
   "author": "Cleverton Inacio",
-  "homepage": "https://github.com/clevinacio/lightstrator",
+  "homepage": "https://github.com/Clevinacio/lightstrator",
   "repository": {
     "type": "git",
-    "url": "https://github.com/clevinacio/lightstrator.git"
+    "url": "https://github.com/Clevinacio/lightstrator.git"
   },
   "scripts": {
     "build": "node scripts/build.mjs",

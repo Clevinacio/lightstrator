@@ -28,7 +28,7 @@ valendo, mas a economia estrutural não.
 ```
 /plugin marketplace add JuliusBrussee/caveman
 /plugin install caveman@caveman
-/plugin marketplace add clevinacio/lightstrator
+/plugin marketplace add Clevinacio/lightstrator
 /plugin install lightstrator@lightstrator
 ```
 

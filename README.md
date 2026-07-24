@@ -21,7 +21,7 @@ obrigatório** — instale primeiro:
 Depois o Lightstrator:
 
 ```
-/plugin marketplace add clevinacio/lightstrator
+/plugin marketplace add Clevinacio/lightstrator
 /plugin install lightstrator@lightstrator
 ```
 
