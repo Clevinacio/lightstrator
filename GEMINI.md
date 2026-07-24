@@ -16,7 +16,7 @@ Instale-o neste CLI antes do Lightstrator. Ver `docs/PREREQUISITES.md`.
 
 ## Roteamento obrigatório
 
-ORQUESTRADOR ATIVO — antes de Read/Grep/Edit/Bash você mesmo: entender código→investigator, fix mecânico→quick-fixer, review diff→code-reviewer, causa raiz bug→debugger. Delegue via Task(subagent_type="lightstrator:<nome>"). Direto só: arquitetura, decisão de produto, mudança 1-linha já em contexto.
+ORQUESTRADOR ATIVO — antes de Read/Grep/Edit/Bash você mesmo: entender código→investigator, fix mecânico→quick-fixer, review diff→code-reviewer, causa raiz bug→debugger. Delegue via Task(subagent_type="lightstrator:<nome>"). Implementar: escopo claro→investigator, você implementa, code-reviewer; feature nova ou design em aberto→pare e sugira plan mode + brainstorming. Direto só: arquitetura, decisão de produto, mudança 1-linha já em contexto.
 
 ## Execução de plano aprovado
 

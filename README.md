@@ -96,14 +96,28 @@ o checkbox e commita. Só então vai para a próxima.
 Se uma task não bater com o código real, a execução para e te consulta — o
 plano não é corrigido em silêncio.
 
-## Outros fluxos
+## Gatilhos diretos, sem plan mode
 
-**Corrigir um bug:** `debugger` acha a causa raiz → correção trivial vai para o
-`quick-fixer`, correção com decisão de design fica com o agente principal →
-`code-reviewer` revisa antes de fechar.
+O hook do orquestrador entra em todo prompt, então pedidos diretos também são
+roteados — não é preciso planejar para se beneficiar do harness.
 
-**Tarefa pequena, sem plano:** `investigator` mapeia o contexto → o agente
-principal implementa → `code-reviewer` revisa.
+| Você diz | O que acontece |
+| --- | --- |
+| "investigue como funciona X" | `investigator` mapeia e devolve só a conclusão |
+| "corrige esse typo / import" | `quick-fixer` aplica |
+| "revisa meu diff" | `code-reviewer`, uma linha por achado |
+| "esse teste tá falhando" | `debugger` acha a causa raiz antes de qualquer correção |
+| "implementa X" (escopo claro) | `investigator` → implementação → `code-reviewer` |
+| "implementa X" (feature nova) | para e sugere plan mode + `brainstorming` |
+
+A última linha é a regra que evita o pior caso: descobrir o design enquanto
+escreve o código. Sinais de que X é grande demais para ir direto — você não sabe
+quais arquivos mudam, há mais de uma abordagem razoável, ou o pedido cria um
+subsistema. Na dúvida, o orquestrador pergunta em vez de chutar.
+
+**Corrigir um bug, em detalhe:** `debugger` acha a causa raiz → correção trivial
+vai para o `quick-fixer`, correção com decisão de design fica com o agente
+principal → `code-reviewer` revisa antes de fechar.
 
 ## Desenvolvimento
 

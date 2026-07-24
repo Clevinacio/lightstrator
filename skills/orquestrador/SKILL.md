@@ -1,6 +1,6 @@
 ---
 name: orquestrador
-description: Roteia tarefas de investigação, correção pequena, revisão de código e debugging para sub-agents especializados em vez de executá-las diretamente. Use SEMPRE ao sair do plan mode para executar um plano aprovado, e antes de investigar código, corrigir um erro pequeno, revisar um diff, ou debugar um problema — antes de usar Read/Grep/Edit/Bash você mesmo para essas finalidades.
+description: Roteia implementação, investigação, correção pequena, revisão de código e debugging para sub-agents especializados em vez de executá-las diretamente. Use SEMPRE ao sair do plan mode para executar um plano aprovado, e ao receber pedidos como "implemente", "investigue", "corrija", "revise" ou "debuga" — antes de usar Read/Grep/Edit/Bash você mesmo para essas finalidades.
 ---
 
 # Roteamento obrigatório para sub-agents
@@ -23,6 +23,8 @@ proteger.
 | Situação                                                                            | Sub-agent                 |
 | ----------------------------------------------------------------------------------- | ------------------------- |
 | Plano aprovado, execução começando                                                  | Você (ver "Execução de plano aprovado") |
+| "Implemente X" com escopo claro e delimitado                                        | Você, após `investigator` (ver "Implementação sem plano") |
+| "Implemente X" onde X é feature nova ou tem design em aberto                        | `brainstorming` primeiro (ver "Implementação sem plano") |
 | Precisa entender onde algo está implementado / como um fluxo funciona antes de agir | `investigator`            |
 | Erro pequeno e mecânico: typo, import, lint, formatação, sintaxe óbvia              | `quick-fixer`             |
 | Revisar um diff / mudança antes de commit ou merge                                  | `code-reviewer`           |
@@ -46,6 +48,35 @@ dúvida, use o nome que aparece na lista de subagentes disponíveis da sessão.
 
 Depois de cada delegação, incorpore o resultado no seu raciocínio antes de
 prosseguir — não repita o trabalho que o sub-agent já fez.
+
+## Implementação sem plano
+
+Nem todo "implemente X" precisa passar por plan mode. A decisão é de tamanho,
+não de formalidade — e é sua, antes de tocar em qualquer arquivo.
+
+**Escopo claro e delimitado → implemente agora.** Você sabe quais arquivos
+mudam, não há decisão de design em aberto, e a mudança cabe em uma revisão.
+Exemplos: corrigir o texto de um label, adicionar um campo a um formulário
+existente, incluir um caso num `switch`, expor um parâmetro que já existe
+internamente.
+
+1. `investigator` → mapeia contexto e padrões existentes (pule se você já tem
+   os arquivos e o padrão em contexto ativo).
+2. Você implementa.
+3. `code-reviewer` → revisa antes de considerar concluído.
+
+**Feature nova ou design em aberto → não implemente ainda.** Sinais: você não
+sabe quais arquivos vão mudar, há mais de uma abordagem razoável, a mudança
+cria um subsistema, ou o pedido tem requisitos implícitos que só o usuário pode
+confirmar. Exemplos: "implementa login com OAuth", "cria o sistema de billing",
+"adiciona modo offline".
+
+Nesse caso, pare e diga ao usuário que vale planejar antes — sugira entrar em
+plan mode — e conduza o design pela skill `brainstorming`. Não comece a
+escrever código para descobrir o desenho durante a implementação.
+
+**Na dúvida entre os dois, pergunte.** Uma pergunta custa muito menos que uma
+feature implementada na direção errada.
 
 ## Execução de plano aprovado
 
