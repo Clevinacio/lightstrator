@@ -1,0 +1,5 @@
+# Todo o repositório exige revisão do mantenedor.
+# Os caminhos abaixo executam na máquina de quem instala o plugin ou entram
+# direto no contexto de um agente de código — mudanças neles são o vetor de
+# risco principal deste repositório.
+* @Clevinacio

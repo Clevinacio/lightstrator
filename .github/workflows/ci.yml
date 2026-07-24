@@ -5,6 +5,11 @@ on:
     branches: [main]
   pull_request:
 
+# Sem isto o job herda o default do repositório, que pode ser read/write.
+# A CI só lê o checkout — nada aqui precisa escrever no repositório.
+permissions:
+  contents: read
+
 jobs:
   check:
     runs-on: ubuntu-latest

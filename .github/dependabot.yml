@@ -1,0 +1,12 @@
+version: 2
+updates:
+  # O plugin não tem dependências de runtime (o build usa só o Node built-in),
+  # então o único ecossistema a acompanhar são as actions da CI.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: "ci"
+    labels:
+      - dependencies
