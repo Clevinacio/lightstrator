@@ -1,0 +1,17 @@
+{
+  "name": "lightstrator",
+  "version": "0.1.0",
+  "description": "Harness de orquestração para agentes de código: subagentes especializados, roteamento obrigatório e fluxo brainstorm → plano.",
+  "license": "MIT",
+  "type": "module",
+  "author": "Cleverton Inacio",
+  "homepage": "https://github.com/clevinacio/lightstrator",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/clevinacio/lightstrator.git"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "check": "node scripts/build.mjs --check"
+  }
+}
