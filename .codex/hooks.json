@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'ORQUESTRADOR ATIVO — antes de Read/Grep/Edit/Bash você mesmo: entender código→investigator, fix mecânico→quick-fixer, review diff→code-reviewer, causa raiz bug→debugger. Delegue via Task(subagent_type=...). Direto só: arquitetura, decisão de produto, mudança 1-linha já em contexto.'",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}
