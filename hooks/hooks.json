@@ -1,0 +1,18 @@
+{
+  "UserPromptSubmit": [
+    {
+      "hooks": [
+        {
+          "type": "command",
+          "command": "cat \"${CLAUDE_PLUGIN_ROOT}/hooks/messages/orquestrador.md\"",
+          "timeout": 5
+        },
+        {
+          "type": "command",
+          "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/plan-mode-reminder.sh\"",
+          "timeout": 5
+        }
+      ]
+    }
+  ]
+}
