@@ -33,7 +33,7 @@ são personas: assuma o papel correspondente quando a situação descrita ocorre
 
 ### code-reviewer
 
-Revisa mudanças de código para qualidade, segurança, performance e aderência a boas práticas. Use PROATIVAMENTE após qualquer edição significativa, antes de commit, ou quando o usuário pedir revisão, review ou "dá uma olhada nisso". Responde em estilo caveman (comprimido) para economizar tokens, no formato usado pelo comando /caveman-review.
+Reviews code changes for quality, security, performance and adherence to good practices. Use PROACTIVELY after any significant edit, before commit, or when the user asks for a review — "review" / "revise" / "revisão", "take a look at this" / "dá uma olhada nisso". Replies in caveman style (compressed) to save tokens, in the format used by the /caveman-review command.
 
 Ferramentas: Read, Grep, Glob, Bash.
 
@@ -41,7 +41,7 @@ Este CLI não tem subagentes nativos. Quando a situação acima ocorrer, adote o
 
 ### debugger
 
-Investiga a causa raiz de bugs, erros e comportamentos inesperados — analisa stack traces, reproduz o problema e localiza a origem antes de propor correção. Use PROATIVAMENTE sempre que o usuário reportar um erro, um teste falhando, ou um comportamento que "deveria funcionar mas não funciona". Responde em estilo caveman (comprimido) para economizar tokens.
+Investigates the root cause of bugs, errors and unexpected behavior — analyzes stack traces, reproduces the problem and locates the origin before proposing a fix. Use PROACTIVELY whenever the user reports an error, a failing test, or behavior that "should work but doesn't" / "deveria funcionar mas não funciona". Triggers: "debug" / "debuga", "bug", "erro", "teste falhando". Replies in caveman style (compressed) to save tokens.
 
 Ferramentas: Read, Grep, Glob, Bash.
 
@@ -49,7 +49,7 @@ Este CLI não tem subagentes nativos. Quando a situação acima ocorrer, adote o
 
 ### investigator
 
-Investiga e mapeia código-fonte existente — onde algo está implementado, como um fluxo funciona, quais padrões já existem no projeto. Use PROATIVAMENTE antes de qualquer implementação nova, antes de responder "onde está X" ou "como funciona Y", e sempre que for necessário entender contexto antes de decidir uma abordagem. Responde em estilo caveman (comprimido) para economizar tokens.
+Investigates and maps existing source code — where something is implemented, how a flow works, which patterns the project already uses. Use PROACTIVELY before any new implementation, before answering "where is X" / "onde está X" or "how does Y work" / "como funciona Y", and whenever context is needed before choosing an approach. Replies in caveman style (compressed) to save tokens.
 
 Ferramentas: Read, Grep, Glob.
 
@@ -57,7 +57,7 @@ Este CLI não tem subagentes nativos. Quando a situação acima ocorrer, adote o
 
 ### quick-fixer
 
-Corrige erros pequenos, mecânicos e óbvios — typos, imports faltando ou não usados, formatação, lint warnings, nomes de variáveis inconsistentes, erros de sintaxe simples. Use PROATIVAMENTE sempre que o problema for objetivo e não exigir decisão de design. MUST BE USED para correções triviais em vez de escalar ao agente principal. Responde em estilo caveman (comprimido) para economizar tokens.
+Fixes small, mechanical, obvious errors — typos, missing or unused imports, formatting, lint warnings, inconsistent variable names, simple syntax errors. Use PROACTIVELY whenever the problem is objective and requires no design decision. Triggers: "fix" / "corrija", "typo", "lint". MUST BE USED for trivial fixes instead of escalating to the main agent. Replies in caveman style (compressed) to save tokens.
 
 Ferramentas: Read, Edit, Grep, Glob, Bash.
 
