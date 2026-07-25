@@ -1,1 +1,1 @@
-PLAN MODE: use skill brainstorming ANTES de planejar (design dialogado, aprovação do usuário); depois skill writing-plans para escrever o plano. Não pule direto para o plano.
+PLAN MODE: use the brainstorming skill BEFORE planning (dialogued design, user approval); then the writing-plans skill to write the plan. Do not jump straight to the plan.

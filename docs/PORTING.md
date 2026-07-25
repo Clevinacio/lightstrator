@@ -72,6 +72,6 @@ npm run check     # falha se algo estiver desatualizado (roda no CI)
    objeto retornado por `build()`.
 2. Se o CLI não tiver subagentes, reaproveite `buildContextFile()` — ela já
    monta imports, roteamento e personas a partir da fonte canônica.
-3. Se não tiver hooks, garanta que o texto de `hooks/messages/orquestrador.md`
+3. Se não tiver hooks, garanta que o texto de `hooks/messages/orchestrator.md`
    apareça no arquivo de contexto; é o que mantém o roteamento ativo.
 4. Rode `npm run build && npm run check` e commite os artefatos.

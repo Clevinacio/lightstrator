@@ -16,7 +16,7 @@ Instale-o neste CLI antes do Lightstrator. Ver `docs/PREREQUISITES.md`.
 
 ## Roteamento obrigatório
 
-ORQUESTRADOR ATIVO — antes de Read/Grep/Edit/Bash você mesmo: entender código→investigator, fix mecânico→quick-fixer, review diff→code-reviewer, causa raiz bug→debugger. Delegue via Task(subagent_type="lightstrator:<nome>"). Implementar: escopo claro→investigator, você implementa, code-reviewer; feature nova ou design em aberto→pare e sugira plan mode + brainstorming. Direto só: arquitetura, decisão de produto, mudança 1-linha já em contexto.
+ORCHESTRATOR ACTIVE — before using Read/Grep/Edit/Bash yourself: understand code→investigator, mechanical fix→quick-fixer, review diff→code-reviewer, bug root cause→debugger. Delegate via Task(subagent_type="lightstrator:<name>"). Implementing: clear scope→investigator, you implement, code-reviewer; new feature or open design→stop and suggest plan mode + brainstorming. Direct only: architecture, product decision, 1-line change already in context.
 
 ## Execução de plano aprovado
 
@@ -24,7 +24,7 @@ Este CLI não tem plan mode nem o hook que anuncia a aprovação. Quando um plan
 for aprovado pelo usuário — por `writing-plans` ou por qualquer outro caminho —
 aplique o mesmo protocolo:
 
-PLANO APROVADO — execução começa agora, sob o roteamento do orquestrador. Trabalhe task por task, na ordem do plano: contexto que falta→investigator, fix mecânico→quick-fixer, causa raiz→debugger; implementação com decisão de design é sua. Delegue via Task(subagent_type="lightstrator:<nome>"). Ao fim de cada task: code-reviewer, marque o checkbox no arquivo do plano, commit. Não implemente o plano inteiro de uma vez nem pule a revisão.
+PLAN APPROVED — execution starts now, under orchestrator routing. Work task by task, in plan order: missing context→investigator, mechanical fix→quick-fixer, root cause→debugger; implementation with design decisions is yours. Delegate via Task(subagent_type="lightstrator:<name>"). At the end of each task: code-reviewer, tick the checkbox in the plan file, commit. Do not implement the whole plan at once and do not skip the review.
 
 ## Personas
 

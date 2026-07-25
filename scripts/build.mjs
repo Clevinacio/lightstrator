@@ -69,7 +69,7 @@ const readMessage = (name) => read(join('hooks', 'messages', `${name}.md`)).trim
  * Arquivo de contexto para CLIs sem subagentes nem (necessariamente) hooks.
  * Serve tanto ao Codex/Antigravity (AGENTS.md) quanto ao Gemini (GEMINI.md).
  */
-function buildContextFile({ skills, agents, orquestrador, planApproved }) {
+function buildContextFile({ skills, agents, orchestrator, planApproved }) {
   const imports = skills.map((s) => `@./skills/${s}/SKILL.md`).join('\n');
 
   const personas = agents
@@ -100,7 +100,7 @@ Instale-o neste CLI antes do Lightstrator. Ver \`docs/PREREQUISITES.md\`.
 
 ## Roteamento obrigatório
 
-${orquestrador}
+${orchestrator}
 
 ## Execução de plano aprovado
 
@@ -121,10 +121,10 @@ ${BANNER}
 `;
 }
 
-function buildCodexHooks(orquestrador) {
+function buildCodexHooks(orchestrator) {
   // O Codex não expande ${CLAUDE_PLUGIN_ROOT}, então a mensagem entra inline.
   // Aspas simples são escapadas para sobreviver ao echo '...' do shell.
-  const escaped = orquestrador.replace(/'/g, `'\\''`);
+  const escaped = orchestrator.replace(/'/g, `'\\''`);
   return {
     hooks: {
       UserPromptSubmit: [
@@ -152,7 +152,7 @@ function build() {
   const context = buildContextFile({
     skills: listSkills(),
     agents: readAgents(),
-    orquestrador: readMessage('orquestrador'),
+    orchestrator: readMessage('orchestrator'),
     planApproved: readMessage('plan-approved'),
   });
 
@@ -191,7 +191,7 @@ function build() {
     'GEMINI.md': context,
     'gemini-extension.json': json(geminiExtension),
     '.codex-plugin/plugin.json': json(codexPlugin),
-    '.codex/hooks.json': json(buildCodexHooks(readMessage('orquestrador'))),
+    '.codex/hooks.json': json(buildCodexHooks(readMessage('orchestrator'))),
     '.codex/config.toml': '[features]\nhooks = true\n',
   };
 }
