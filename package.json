@@ -1,7 +1,7 @@
 {
   "name": "lightstrator",
   "version": "0.1.0",
-  "description": "Harness de orquestração para agentes de código: subagentes especializados, roteamento obrigatório e fluxo brainstorm → plano.",
+  "description": "Orchestration harness for coding agents: specialized sub-agents, mandatory routing and a brainstorm → plan flow.",
   "license": "MIT",
   "type": "module",
   "author": "Cleverton Inacio",

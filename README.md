@@ -1,149 +1,162 @@
 # Lightstrator
 
-Harness de orquestração para agentes de código: em vez de o modelo principal
-sair lendo e editando arquivos sozinho, ele roteia o trabalho para subagentes
-especializados que respondem comprimido. O contexto principal dura muito mais
-numa sessão longa.
+**English** · [Português (Brasil)](README.pt-BR.md)
 
-Funciona no **Claude Code** (nativo), **Codex CLI** e **Gemini CLI /
-Antigravity** (personas + contexto). Prompts em Português Brasileiro.
+Orchestration harness for coding agents: instead of the main model going off
+reading and editing files on its own, it routes the work to specialized
+sub-agents that reply compressed. The main context lasts far longer in a long
+session.
 
-## Instalação
+Works on **Claude Code** (native), **Codex CLI** and **Gemini CLI /
+Antigravity** (personas + context). Prompts are in English, but the activation
+triggers are bilingual — requests in Portuguese are still routed, and the agent
+replies in whichever language you write.
 
-O plugin [caveman](https://github.com/JuliusBrussee/caveman) é **pré-requisito
-obrigatório** — instale primeiro:
+## Installation
+
+The [caveman](https://github.com/JuliusBrussee/caveman) plugin is a **required
+prerequisite** — install it first:
 
 ```
 /plugin marketplace add JuliusBrussee/caveman
 /plugin install caveman@caveman
 ```
 
-Depois o Lightstrator:
+Then Lightstrator:
 
 ```
 /plugin marketplace add Clevinacio/lightstrator
 /plugin install lightstrator@lightstrator
 ```
 
-Também é preciso ter o `jq` no PATH. Detalhes, opcionais (`rtk`, statusline) e
-instruções para outros CLIs: [`docs/PREREQUISITES.md`](docs/PREREQUISITES.md).
+You also need `jq` on your PATH. Details, optionals (`rtk`, statusline) and
+instructions for other CLIs:
+[`docs/PREREQUISITES.md`](docs/PREREQUISITES.md).
 
-## O que vem no pacote
+## What ships in the package
 
-### Subagentes
+### Sub-agents
 
-| Agente | Modelo | Quando dispara |
+| Agent | Model | When it fires |
 | --- | --- | --- |
-| `investigator` | haiku | Entender onde algo está implementado ou como um fluxo funciona, antes de agir |
-| `quick-fixer` | haiku | Erro pequeno e mecânico: typo, import, lint, formatação, sintaxe óbvia |
-| `code-reviewer` | sonnet | Revisar um diff antes de commit ou merge |
-| `debugger` | sonnet | Bug, teste falhando, comportamento inesperado — achar causa raiz |
+| `investigator` | haiku | Understand where something is implemented or how a flow works, before acting |
+| `quick-fixer` | haiku | Small mechanical error: typo, import, lint, formatting, obvious syntax |
+| `code-reviewer` | sonnet | Review a diff before commit or merge |
+| `debugger` | sonnet | Bug, failing test, unexpected behavior — find the root cause |
 
-Todos respondem no estilo comprimido do caveman: só o resultado, sem narrar
-processo. Código, caminhos, comandos e mensagens de erro ficam exatos.
+They all reply in caveman's compressed style: only the result, no narrating the
+process. Code, paths, commands and error messages stay exact.
 
 ### Skills
 
-| Skill | Papel |
+| Skill | Role |
 | --- | --- |
-| `orquestrador` | Tabela de roteamento: qual situação vai para qual subagente, e quando **não** delegar |
-| `brainstorming` | Transforma ideia em design por diálogo, uma pergunta por vez, antes de qualquer código |
-| `writing-plans` | Escreve o plano de implementação a partir do design aprovado |
+| `orchestrator` | Routing table: which situation goes to which sub-agent, and when **not** to delegate |
+| `brainstorming` | Turns an idea into a design through dialogue, one question at a time, before any code |
+| `writing-plans` | Writes the implementation plan from the approved design |
 
 ### Hooks
 
-Três injeções de contexto: o roteamento do orquestrador (a cada prompt), a
-sequência brainstorming → writing-plans (só em plan mode) e o handoff de
-execução (ao aprovar um plano, via `PostToolUse` em `ExitPlanMode`).
+Three context injections: the orchestrator routing (on every prompt), the
+brainstorming → writing-plans sequence (in plan mode only) and the execution
+handoff (when a plan is approved, via `PostToolUse` on `ExitPlanMode`).
 
-### Opcionais
+### Optionals
 
-`optional/statusline-limit.sh` (uso dos limites de 5h e semanal na statusline) e
-`optional/rules.md` (regras globais que acompanham o harness).
+`optional/statusline-limit.sh` (5h and weekly limit usage in the statusline) and
+`optional/rules.md` (global rules that ship with the harness).
 
-## Fluxo principal: plan mode → plano → execução
+## Main flow: plan mode → plan → execution
 
-O caminho para qualquer trabalho não-trivial é sempre o mesmo. Cada seta é
-garantida por um hook ou por uma skill, não pela boa vontade do modelo.
+The path for any non-trivial work is always the same. Every arrow is guaranteed
+by a hook or a skill, not by the model's goodwill.
 
 ```
-plan mode ──▶ brainstorming ──▶ writing-plans ──▶ ExitPlanMode ──▶ orquestrador
+plan mode ──▶ brainstorming ──▶ writing-plans ──▶ ExitPlanMode ──▶ orchestrator
    │              │                   │                │               │
-   hook       design por          plano com        aprovação        execução
-plan-mode      diálogo          tasks e steps      do usuário     task a task
+   hook       design through      plan with          user           execution
+plan-mode      dialogue         tasks and steps    approval        task by task
 ```
 
-**1. Entra em plan mode.** O hook injeta o lembrete: brainstorming antes de
-qualquer plano.
+**1. Enter plan mode.** The hook injects the reminder: brainstorming before any
+plan.
 
-**2. `brainstorming`.** Uma pergunta por vez até o design fechar. Nada de
-código antes da sua aprovação.
+**2. `brainstorming`.** One question at a time until the design is settled. No
+code before your approval.
 
-**3. `writing-plans`.** Escreve o plano em tasks pequenas, cada uma com
-arquivos exatos, código e comando de verificação. Em plan mode o plano vai para
-o plan file da sessão; fora dele, para `docs/superpowers/plans/`. O caminho é
-anunciado — a execução começa lendo esse arquivo.
+**3. `writing-plans`.** Writes the plan as small tasks, each with exact files,
+code and a verification command. In plan mode the plan goes to the session's
+plan file; outside it, to `docs/superpowers/plans/`. The path is announced —
+execution starts by reading that file.
 
-**4. Você aprova** via `ExitPlanMode`. A sessão sai para auto mode e o hook
-`PostToolUse` injeta o handoff.
+**4. You approve** via `ExitPlanMode`. The session drops to auto mode and the
+`PostToolUse` hook injects the handoff.
 
-**5. `orquestrador` executa.** Uma task por vez: lê a task, busca contexto
-faltante com o `investigator` (ou pula, se o plano já trouxe), implementa,
-manda fix mecânico para o `quick-fixer`, chama o `debugger` quando um step
-falha de forma inesperada, roda a verificação, passa o `code-reviewer`, marca
-o checkbox e commita. Só então vai para a próxima.
+**5. `orchestrator` executes.** One task at a time: reads the task, fetches
+missing context with `investigator` (or skips it, if the plan already carried
+it), implements, sends mechanical fixes to `quick-fixer`, calls `debugger` when
+a step fails unexpectedly, runs the verification, passes it through
+`code-reviewer`, ticks the checkbox and commits. Only then does it move on.
 
-Se uma task não bater com o código real, a execução para e te consulta — o
-plano não é corrigido em silêncio.
+If a task does not match the real code, execution stops and asks you — the plan
+is not fixed silently.
 
-## Gatilhos diretos, sem plan mode
+## Direct triggers, without plan mode
 
-O hook do orquestrador entra em todo prompt, então pedidos diretos também são
-roteados — não é preciso planejar para se beneficiar do harness.
+The orchestrator hook enters every prompt, so direct requests are routed too —
+you do not need to plan to benefit from the harness.
 
-| Você diz | O que acontece |
+| You say | What happens |
 | --- | --- |
-| "investigue como funciona X" | `investigator` mapeia e devolve só a conclusão |
-| "corrige esse typo / import" | `quick-fixer` aplica |
-| "revisa meu diff" | `code-reviewer`, uma linha por achado |
-| "esse teste tá falhando" | `debugger` acha a causa raiz antes de qualquer correção |
-| "implementa X" (escopo claro) | `investigator` → implementação → `code-reviewer` |
-| "implementa X" (feature nova) | para e sugere plan mode + `brainstorming` |
+| "investigate how X works" | `investigator` maps it and returns only the conclusion |
+| "fix this typo / import" | `quick-fixer` applies it |
+| "review my diff" | `code-reviewer`, one line per finding |
+| "this test is failing" | `debugger` finds the root cause before any fix |
+| "implement X" (clear scope) | `investigator` → implementation → `code-reviewer` |
+| "implement X" (new feature) | stops and suggests plan mode + `brainstorming` |
 
-A última linha é a regra que evita o pior caso: descobrir o design enquanto
-escreve o código. Sinais de que X é grande demais para ir direto — você não sabe
-quais arquivos mudam, há mais de uma abordagem razoável, ou o pedido cria um
-subsistema. Na dúvida, o orquestrador pergunta em vez de chutar.
+The triggers in the `description` fields are bilingual on purpose: the same
+phrases work in Portuguese (`"corrige esse typo"`, `"revisa meu diff"`).
 
-**Corrigir um bug, em detalhe:** `debugger` acha a causa raiz → correção trivial
-vai para o `quick-fixer`, correção com decisão de design fica com o agente
-principal → `code-reviewer` revisa antes de fechar.
+The last row is the rule that avoids the worst case: discovering the design
+while writing the code. Signs that X is too big to go straight in — you do not
+know which files change, there is more than one reasonable approach, or the
+request creates a subsystem. When in doubt, the orchestrator asks instead of
+guessing.
 
-## Desenvolvimento
+**Fixing a bug, in detail:** `debugger` finds the root cause → a trivial fix
+goes to `quick-fixer`, a fix with a design decision stays with the main agent →
+`code-reviewer` reviews before closing.
 
-Fonte canônica (edite à mão): `agents/`, `skills/`, `hooks/`,
+## Development
+
+Canonical source (edit by hand): `agents/`, `skills/`, `hooks/`,
 `.claude-plugin/`, `package.json`.
 
-Gerado por `scripts/build.mjs` (**não** edite): `AGENTS.md`, `GEMINI.md`,
+Generated by `scripts/build.mjs` (do **not** edit): `AGENTS.md`, `GEMINI.md`,
 `gemini-extension.json`, `.codex-plugin/`, `.codex/`.
 
 ```bash
-npm run build     # regera os artefatos dos outros CLIs
-npm run check     # falha se algo estiver desatualizado (roda no CI)
+npm run build     # regenerates the artifacts for the other CLIs
+npm run check     # fails if anything is stale (runs in CI)
 ```
 
-Ver [`docs/PORTING.md`](docs/PORTING.md) para a matriz de degradação por CLI e
-como adicionar um novo alvo.
+See [`docs/PORTING.md`](docs/PORTING.md) for the per-CLI degradation matrix and
+how to add a new target.
 
-## Créditos e licença
+When touching the `description` fields in `agents/*.md` or
+`skills/orchestrator/SKILL.md`, keep the triggers in both languages — CI fails
+if a Portuguese trigger disappears.
 
-MIT — ver [`LICENSE`](LICENSE).
+## Credits and license
 
-As skills `brainstorming` e `writing-plans` são derivadas do
-[superpowers](https://github.com/obra/superpowers) de Jesse Vincent, também sob
-MIT. As modificações estão documentadas em
-[`vendor/superpowers/UPSTREAM.md`](vendor/superpowers/UPSTREAM.md), e a
-atribuição completa no [`NOTICE`](NOTICE).
+MIT — see [`LICENSE`](LICENSE).
 
-O [caveman](https://github.com/JuliusBrussee/caveman) de Julius Brussee é
-dependência, não é redistribuído aqui.
+The `brainstorming` and `writing-plans` skills are derived from
+[superpowers](https://github.com/obra/superpowers) by Jesse Vincent, also under
+MIT. The modifications are documented in
+[`vendor/superpowers/UPSTREAM.md`](vendor/superpowers/UPSTREAM.md), and the full
+attribution is in [`NOTICE`](NOTICE).
+
+[caveman](https://github.com/JuliusBrussee/caveman) by Julius Brussee is a
+dependency, not redistributed here.

@@ -1,51 +1,53 @@
-# Pré-requisitos
+# Prerequisites
 
-O Lightstrator não empacota dependências de terceiros. O que segue precisa ser
-instalado separadamente.
+**English** · [Português (Brasil)](PREREQUISITES.pt-BR.md)
 
-## Obrigatório
+Lightstrator does not bundle third-party dependencies. What follows must be
+installed separately.
+
+## Required
 
 ### caveman
 
-Os 4 agentes delegam o estilo de resposta à skill `caveman` (nível `ultra`), e
-o `code-reviewer` usa o formato do comando `/caveman-review`. É o que mantém o
-output dos subagentes comprimido — sem isso, o ganho de contexto do harness cai
-bastante.
+The 4 agents delegate their reply style to the `caveman` skill (level `ultra`),
+and `code-reviewer` uses the format of the `/caveman-review` command. That is
+what keeps the sub-agents' output compressed — without it, the harness's context
+gain drops considerably.
 
-Instale **antes** do Lightstrator:
+Install it **before** Lightstrator:
 
 ```
 /plugin marketplace add JuliusBrussee/caveman
 /plugin install caveman@caveman
 ```
 
-Repositório: https://github.com/JuliusBrussee/caveman
+Repository: https://github.com/JuliusBrussee/caveman
 
-Outros CLIs: o caveman traz `.codex/` e `GEMINI.md` próprios — siga as
-instruções do repositório dele para o seu CLI.
+Other CLIs: caveman ships its own `.codex/` and `GEMINI.md` — follow the
+instructions in its repository for your CLI.
 
-> **Sem o caveman**, os agentes ainda carregam e funcionam: cada um traz um
-> bloco de fallback com as regras de compressão aplicadas diretamente. É modo
-> degradado — o output fica mais verboso que no caminho suportado.
+> **Without caveman**, the agents still load and work: each one carries a
+> fallback block with the compression rules applied directly. It is a degraded
+> mode — the output is more verbose than on the supported path.
 
 ### jq
 
-Usado pelo hook de plan mode (`hooks/plan-mode-reminder.sh`) para ler o
-`permission_mode` do payload.
+Used by the plan-mode hook (`hooks/plan-mode-reminder.sh`) to read
+`permission_mode` from the payload.
 
 ```bash
 sudo apt install jq     # Debian/Ubuntu
 brew install jq         # macOS
 ```
 
-## Opcional
+## Optional
 
 ### rtk
 
-Proxy de CLI que reduz tokens em operações de shell (60-90% em operações de
-desenvolvimento). Instalação externa — ver o projeto do rtk.
+A CLI proxy that reduces token usage in shell calls (60-90% on typical dev
+workflows). Installed externally — see the rtk project.
 
-Para ativar, acrescente ao seu `settings.json`:
+To enable it, add to your `settings.json`:
 
 ```json
 {
@@ -60,14 +62,14 @@ Para ativar, acrescente ao seu `settings.json`:
 }
 ```
 
-Verificação: `rtk gain` deve funcionar. Se falhar, você pode ter o
-`reachingforthejack/rtk` (Rust Type Kit) instalado no lugar — nomes colidem.
+Check: `rtk gain` should work. If it fails, you may have
+`reachingforthejack/rtk` (Rust Type Kit) installed instead — the names collide.
 
 ### Statusline
 
-`optional/statusline-limit.sh` mostra modelo, diretório e uso dos limites de 5h
-e semanal com tempo até resetar (dados de `rate_limits`, disponíveis para
-assinantes Pro/Max). Requer `jq`.
+`optional/statusline-limit.sh` shows the model, the directory and the 5h and
+weekly limit usage with time until reset (data from `rate_limits`, available to
+Pro/Max subscribers). Requires `jq`.
 
 ```json
 {
@@ -78,7 +80,8 @@ assinantes Pro/Max). Requer `jq`.
 }
 ```
 
-### Regras globais
+### Global rules
 
-`optional/rules.md` traz duas regras que acompanham o harness — em especial
-evitar o agente `Explore`, que compete com o roteamento para o `investigator`.
+`optional/rules.md` carries two rules that ship with the harness — in
+particular, avoiding the `Explore` agent, which competes with routing to
+`investigator`.

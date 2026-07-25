@@ -1,12 +1,12 @@
 ---
 name: writing-plans
-description: Use SEMPRE em plan mode após o design aprovado pelo brainstorming, e sempre que houver spec ou requisitos de tarefa multi-etapas, antes de tocar código
+description: Use ALWAYS in plan mode after the design approved by brainstorming, and whenever there is a spec or multi-step task requirements — "escreva o plano", "plano de implementação" — before touching code
 ---
 
 <!--
-Derivado de superpowers (https://github.com/obra/superpowers) 6.2.0,
-Copyright (c) 2025 Jesse Vincent, licença MIT. Modificado.
-Ver vendor/superpowers/UPSTREAM.md e NOTICE.
+Derived from superpowers (https://github.com/obra/superpowers) 6.2.0,
+Copyright (c) 2025 Jesse Vincent, MIT license. Modified.
+See vendor/superpowers/UPSTREAM.md and NOTICE.
 -->
 
 # Writing Plans
@@ -171,8 +171,8 @@ execution starts by reading that file. Then present the plan for user approval
 (in plan mode, via ExitPlanMode).
 
 Approval ends this skill. Execution happens in-session, immediately after, and
-belongs to the **orquestrador** skill: invoke it and follow its "Execução de
-plano aprovado" section — one task at a time, delegating to `investigator`,
+belongs to the **orchestrator** skill: invoke it and follow its "Executing an
+approved plan" section — one task at a time, delegating to `investigator`,
 `quick-fixer` and `debugger` as each task calls for it, running
 `code-reviewer` and ticking the checkboxes before moving on.
 

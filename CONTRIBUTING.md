@@ -1,62 +1,75 @@
-# Contribuindo
+# Contributing
 
-## Antes de qualquer coisa
+**English** · [Português (Brasil)](CONTRIBUTING.pt-BR.md)
 
-Leia [`SECURITY.md`](SECURITY.md). Este plugin executa shell na máquina de quem
-o instala e injeta instruções no contexto de um agente com permissão de escrita.
-Mudanças em `hooks/`, `agents/` e `skills/` são revisadas com esse peso.
+## Before anything else
 
-Se encontrou uma vulnerabilidade, **não abra PR nem issue** — use o
+Read [`SECURITY.md`](SECURITY.md). This plugin runs shell on the machine of
+whoever installs it and injects instructions into the context of an agent with
+write permission. Changes to `hooks/`, `agents/` and `skills/` are reviewed with
+that weight.
+
+If you found a vulnerability, **do not open a PR or an issue** — use
 [private vulnerability reporting](https://github.com/Clevinacio/lightstrator/security/advisories/new).
 
-## Fonte canônica vs. arquivos gerados
+## Canonical source vs. generated files
 
-Edite à mão apenas:
+Edit by hand only:
 
 ```
 agents/  skills/  hooks/  optional/  docs/  .claude-plugin/  package.json
 ```
 
-Nunca edite (são reescritos pelo build):
+Never edit (they are rewritten by the build):
 
 ```
 AGENTS.md  GEMINI.md  gemini-extension.json  .codex-plugin/  .codex/
 ```
 
-Depois de mexer na fonte canônica:
+After touching the canonical source:
 
 ```bash
-npm run build     # regera os artefatos dos outros CLIs
-npm run check     # falha se algo estiver fora de sincronia
+npm run build     # regenerates the artifacts for the other CLIs
+npm run check     # fails if anything is out of sync
 ```
 
-Commite os artefatos gerados junto com a mudança — o `/plugin install` lê o
-repositório direto, sem passo de build. A CI rejeita PR com artefato
-desatualizado.
+Commit the generated artifacts along with the change — `/plugin install` reads
+the repository directly, with no build step. CI rejects a PR with a stale
+artifact.
 
-## O que a CI verifica
+## What CI checks
 
-- artefatos gerados em dia (`build --check`);
-- todo JSON versionado é válido;
-- todo `.sh` passa em `bash -n`;
-- `hooks/hooks.json` tem a chave de topo `hooks` e todo arquivo referenciado via
-  `${CLAUDE_PLUGIN_ROOT}` existe;
-- os quatro agentes mantêm a integração com o caveman.
+- generated artifacts up to date (`build --check`);
+- every versioned JSON is valid;
+- every `.sh` passes `bash -n`;
+- `hooks/hooks.json` has the top-level `hooks` key and every file referenced via
+  `${CLAUDE_PLUGIN_ROOT}` exists;
+- the four agents keep the caveman integration;
+- the Portuguese triggers are still present in the `description` fields;
+- every bilingual doc has its `.md` / `.pt-BR.md` pair.
 
-## Alterando skills derivadas
+## Changing derived skills
 
-`skills/brainstorming/` e `skills/writing-plans/` vêm do
-[superpowers](https://github.com/obra/superpowers) (MIT). Toda modificação
-precisa ser registrada em [`vendor/superpowers/UPSTREAM.md`](vendor/superpowers/UPSTREAM.md),
-com o que mudou e por quê. Não remova os cabeçalhos de atribuição.
+`skills/brainstorming/` and `skills/writing-plans/` come from
+[superpowers](https://github.com/obra/superpowers) (MIT). Every modification
+must be recorded in [`vendor/superpowers/UPSTREAM.md`](vendor/superpowers/UPSTREAM.md),
+with what changed and why. Do not remove the attribution headers.
 
-## Idioma
+## Language
 
-Prompts de agentes e skills em Português Brasileiro. Mensagens de commit e
-código em português também, sem marcação de co-autoria de ferramenta.
+Agent and skill prompts are in English. The `description` fields in
+`agents/*.md` and `skills/orchestrator/SKILL.md` keep the trigger verbs in
+**both languages** — that is what keeps a request written in Portuguese routed
+to the right sub-agent. CI fails if a Portuguese trigger is removed.
+
+Documentation: `README`, `CONTRIBUTING` and `docs/PREREQUISITES` have a
+bilingual pair (`.md` in English, `.pt-BR.md` in Portuguese) and must be updated
+together. `SECURITY.md` and `docs/PORTING.md` are English only.
+
+Commit messages are in Portuguese, with no tool co-authorship marker.
 
 ## Pull requests
 
-Um assunto por PR. Descreva o comportamento antes e depois — para mudanças em
-prompt, diga qual gatilho passa a disparar ou deixa de disparar, já que não há
-teste automatizado que capture isso.
+One subject per PR. Describe the behavior before and after — for prompt changes,
+say which trigger starts or stops firing, since there is no automated test that
+captures it.

@@ -1,6 +1,6 @@
 {
   "name": "lightstrator",
-  "description": "Marketplace do harness Lightstrator",
+  "description": "Marketplace for the Lightstrator harness",
   "owner": {
     "name": "Cleverton Inacio",
     "url": "https://github.com/Clevinacio"
@@ -8,7 +8,7 @@
   "plugins": [
     {
       "name": "lightstrator",
-      "description": "Harness de orquestração: subagentes especializados, roteamento obrigatório e fluxo brainstorm → plano. Requer o plugin caveman.",
+      "description": "Orchestration harness: specialized sub-agents, mandatory routing and a brainstorm → plan flow. Requires the caveman plugin.",
       "version": "0.1.0",
       "source": "./",
       "author": {

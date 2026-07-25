@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Injeta o lembrete de plan mode apenas quando o CLI está em plan mode.
-# Recebe o payload do hook em JSON via stdin. Requer jq.
+# Injects the plan-mode reminder only when the CLI is in plan mode.
+# Receives the hook payload as JSON on stdin. Requires jq.
 set -euo pipefail
 
 input=$(cat)
