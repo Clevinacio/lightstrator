@@ -1,5 +1,5 @@
 ---
-name: orquestrador
+name: orchestrator
 description: Roteia implementação, investigação, correção pequena, revisão de código e debugging para sub-agents especializados em vez de executá-las diretamente. Use SEMPRE ao sair do plan mode para executar um plano aprovado, e ao receber pedidos como "implemente", "investigue", "corrija", "revise" ou "debuga" — antes de usar Read/Grep/Edit/Bash você mesmo para essas finalidades.
 ---
 

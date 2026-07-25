@@ -1,5 +1,5 @@
 @./skills/brainstorming/SKILL.md
-@./skills/orquestrador/SKILL.md
+@./skills/orchestrator/SKILL.md
 @./skills/writing-plans/SKILL.md
 
 # Lightstrator

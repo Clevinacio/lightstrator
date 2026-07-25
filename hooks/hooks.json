@@ -22,7 +22,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cat \"${CLAUDE_PLUGIN_ROOT}/hooks/messages/plano-aprovado.md\"",
+            "command": "cat \"${CLAUDE_PLUGIN_ROOT}/hooks/messages/plan-approved.md\"",
             "timeout": 5
           }
         ]

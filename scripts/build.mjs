@@ -69,7 +69,7 @@ const readMessage = (name) => read(join('hooks', 'messages', `${name}.md`)).trim
  * Arquivo de contexto para CLIs sem subagentes nem (necessariamente) hooks.
  * Serve tanto ao Codex/Antigravity (AGENTS.md) quanto ao Gemini (GEMINI.md).
  */
-function buildContextFile({ skills, agents, orquestrador, planoAprovado }) {
+function buildContextFile({ skills, agents, orquestrador, planApproved }) {
   const imports = skills.map((s) => `@./skills/${s}/SKILL.md`).join('\n');
 
   const personas = agents
@@ -108,7 +108,7 @@ Este CLI não tem plan mode nem o hook que anuncia a aprovação. Quando um plan
 for aprovado pelo usuário — por \`writing-plans\` ou por qualquer outro caminho —
 aplique o mesmo protocolo:
 
-${planoAprovado}
+${planApproved}
 
 ## Personas
 
@@ -153,7 +153,7 @@ function build() {
     skills: listSkills(),
     agents: readAgents(),
     orquestrador: readMessage('orquestrador'),
-    planoAprovado: readMessage('plano-aprovado'),
+    planApproved: readMessage('plan-approved'),
   });
 
   // Propaga a versão para os manifests canônicos.
