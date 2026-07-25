@@ -1,22 +1,22 @@
 Lightstrator
 Copyright (c) 2026 Cleverton Inacio
-Licenciado sob a licença MIT (ver LICENSE).
+Licensed under the MIT license (see LICENSE).
 
 --------------------------------------------------------------------
-Este produto inclui software derivado de Superpowers
+This product includes software derived from Superpowers
 (https://github.com/obra/superpowers), Copyright (c) 2025 Jesse Vincent,
-licenciado sob a licença MIT.
+licensed under the MIT license.
 
-Arquivos derivados:
-  skills/brainstorming/   (de superpowers 6.2.0, commit 896224c)
-  skills/writing-plans/   (de superpowers 6.2.0, commit 896224c)
+Derived files:
+  skills/brainstorming/   (from superpowers 6.2.0, commit 896224c)
+  skills/writing-plans/   (from superpowers 6.2.0, commit 896224c)
 
-Modificados em relação ao original. Ver vendor/superpowers/UPSTREAM.md
-para detalhes das alterações e vendor/superpowers/LICENSE para o texto
-integral da licença original.
+Modified from the original. See vendor/superpowers/UPSTREAM.md for
+details of the changes and vendor/superpowers/LICENSE for the full text
+of the original license.
 --------------------------------------------------------------------
 
-O Lightstrator depende, mas NÃO redistribui, o plugin caveman
+Lightstrator depends on, but does NOT redistribute, the caveman plugin
 (https://github.com/JuliusBrussee/caveman), Copyright (c) Julius Brussee.
-A instalação do caveman é feita separadamente pelo usuário — ver
+Installing caveman is done separately by the user — see
 docs/PREREQUISITES.md.

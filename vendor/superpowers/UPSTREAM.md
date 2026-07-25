@@ -1,74 +1,75 @@
-# Origem das skills derivadas
+# Origin of the derived skills
 
-As skills `brainstorming` e `writing-plans` do Lightstrator são derivadas do
-projeto **Superpowers**, redistribuídas sob a licença MIT.
+Lightstrator's `brainstorming` and `writing-plans` skills are derived from the
+**Superpowers** project, redistributed under the MIT license.
 
-| Campo | Valor |
+| Field | Value |
 | --- | --- |
-| Projeto | Superpowers |
-| Repositório | https://github.com/obra/superpowers |
-| Autor | Jesse Vincent (jesse@fsck.com) |
-| Licença | MIT — texto integral em [`LICENSE`](./LICENSE) |
-| Versão de origem | 6.2.0 |
-| Commit de origem | `896224c4b1879920ab573417e68fd51d2ccc9072` |
+| Project | Superpowers |
+| Repository | https://github.com/obra/superpowers |
+| Author | Jesse Vincent (jesse@fsck.com) |
+| License | MIT — full text in [`LICENSE`](./LICENSE) |
+| Source version | 6.2.0 |
+| Source commit | `896224c4b1879920ab573417e68fd51d2ccc9072` |
 
-Arquivos idênticos ao upstream (nenhuma modificação):
+Files identical to upstream (no modification):
 
 - `skills/brainstorming/spec-document-reviewer-prompt.md`
-- `skills/brainstorming/scripts/` (todo o diretório)
+- `skills/brainstorming/scripts/` (the whole directory)
 - `skills/writing-plans/plan-document-reviewer-prompt.md`
 
-## Modificações
+## Modifications
 
 ### `skills/brainstorming/SKILL.md`
 
-- **`description`** — traduzida para PT-BR e reescrita para disparar ao entrar
-  em plan mode, além dos gatilhos originais de trabalho criativo.
-- **Passo 6 do checklist e seção "Documentation"** — o spec deixa de ser
-  commitado automaticamente; o usuário commita manualmente.
-- **Seção "Documentation"** — removida a referência à skill
-  `elements-of-style:writing-clearly-and-concisely`, que não faz parte deste
-  plugin.
-- **Seção "Exploring approaches"** — a linha "YAGNI ruthlessly" saiu daqui e
-  passou a integrar a seção "Key Principles".
-- **Seção "Key Principles"** — acrescentada (uma pergunta por vez, múltipla
-  escolha preferida, YAGNI, explorar alternativas, validação incremental,
-  flexibilidade).
+- **`description`** — rewritten to fire when entering plan mode, on top of the
+  original creative-work triggers, and carrying bilingual (English/Portuguese)
+  activation triggers.
+- **Checklist step 6 and the "Documentation" section** — the spec is no longer
+  committed automatically; the user commits manually.
+- **"Documentation" section** — removed the reference to the
+  `elements-of-style:writing-clearly-and-concisely` skill, which is not part of
+  this plugin.
+- **"Exploring approaches" section** — the "YAGNI ruthlessly" line moved out of
+  here and became part of the "Key Principles" section.
+- **"Key Principles" section** — added (one question at a time, multiple choice
+  preferred, YAGNI, explore alternatives, incremental validation, flexibility).
 
 ### `skills/brainstorming/visual-companion.md`
 
-- Removido o bloco de instruções de inicialização do servidor específico do
-  **Gemini CLI** (`--foreground` + `is_background: true`).
+- Removed the **Gemini CLI**-specific server startup instructions block
+  (`--foreground` + `is_background: true`).
 
 ### `skills/writing-plans/SKILL.md`
 
-- **`description`** — traduzida para PT-BR e reescrita para disparar em plan
-  mode, após o design aprovado pelo `brainstorming`.
-- **Seção "Overview"** — removida a referência à skill
-  `superpowers:using-git-worktrees`, ausente deste plugin.
-- **Cabeçalho do plano** — a linha "For agentic workers" que exigia
-  `superpowers:subagent-driven-development` ou `superpowers:executing-plans`
-  foi substituída por uma nota simples sobre a sintaxe de checkbox.
-- **Seção "Remember"** — acrescentada (caminhos exatos, código completo em
-  cada passo, comandos com saída esperada, DRY/YAGNI/TDD/commits frequentes).
-- **Seção "Overview" — onde salvar o plano** — o caminho único
-  `docs/superpowers/plans/` virou uma regra por contexto: em plan mode o plano
-  vai para o plan file que o harness designou (o único arquivo editável
-  durante o planejamento), e fora do plan mode segue em
-  `docs/superpowers/plans/`. Sem isso, a skill pedia um caminho que o plan mode
-  do Claude Code não permite escrever, e a execução não sabia qual arquivo ler.
-- **Seção "Execution Handoff"** — o menu de duas opções de execução
-  (subagent-driven vs. inline), que dependia de skills do superpowers não
-  incluídas aqui, foi substituído pelo fluxo do Lightstrator: anunciar o
-  caminho exato do plano, apresentar para aprovação (via `ExitPlanMode` em plan
-  mode) e passar a execução para a skill `orquestrador`, que conduz task a task
-  delegando aos subagentes. Inclui a proibição explícita de implementar direto
-  desta skill ou de executar o plano inteiro numa passada.
+- **`description`** — rewritten to fire in plan mode, after the design approved
+  by `brainstorming`, and carrying bilingual (English/Portuguese) activation
+  triggers.
+- **"Overview" section** — removed the reference to the
+  `superpowers:using-git-worktrees` skill, absent from this plugin.
+- **Plan header** — the "For agentic workers" line that required
+  `superpowers:subagent-driven-development` or `superpowers:executing-plans` was
+  replaced by a simple note about the checkbox syntax.
+- **"Remember" section** — added (exact paths, complete code in every step,
+  commands with expected output, DRY/YAGNI/TDD/frequent commits).
+- **"Overview" section — where to save the plan** — the single path
+  `docs/superpowers/plans/` became a per-context rule: in plan mode the plan
+  goes to the plan file the harness assigned (the only editable file during
+  planning), and outside plan mode it stays in `docs/superpowers/plans/`.
+  Without this, the skill asked for a path that Claude Code's plan mode does not
+  allow writing to, and execution did not know which file to read.
+- **"Execution Handoff" section** — the two-option execution menu
+  (subagent-driven vs. inline), which depended on superpowers skills not
+  included here, was replaced by the Lightstrator flow: announce the plan's
+  exact path, present it for approval (via `ExitPlanMode` in plan mode) and hand
+  execution over to the `orchestrator` skill, which drives it task by task,
+  delegating to the sub-agents. Includes the explicit prohibition against
+  implementing straight from this skill or executing the whole plan in one pass.
 
-## Como conferir
+## How to verify
 
 ```bash
-# Com o superpowers 6.2.0 instalado localmente:
+# With superpowers 6.2.0 installed locally:
 SP=~/.claude/plugins/cache/claude-plugins-official/superpowers/6.2.0/skills
 diff -u $SP/brainstorming/SKILL.md   skills/brainstorming/SKILL.md
 diff -u $SP/writing-plans/SKILL.md   skills/writing-plans/SKILL.md

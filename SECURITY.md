@@ -1,53 +1,52 @@
-# Política de segurança
+# Security policy
 
-## Modelo de risco
+## Risk model
 
-O Lightstrator não é um pacote de código comum. Ao ser instalado, ele:
+Lightstrator is not an ordinary code package. Once installed, it:
 
-- **executa shell na máquina do usuário** — `hooks/plan-mode-reminder.sh` roda a
-  cada prompt enviado, e os hooks executam `cat` sobre arquivos do plugin;
-- **injeta texto direto no contexto de um agente de código** —
-  `hooks/messages/*.md`, `agents/*.md` e `skills/**/SKILL.md` são lidos como
-  instrução por um modelo que tem permissão de editar arquivos e rodar comandos
-  no projeto do usuário.
+- **runs shell on the user's machine** — `hooks/plan-mode-reminder.sh` runs on
+  every prompt sent, and the hooks execute `cat` over plugin files;
+- **injects text straight into a coding agent's context** —
+  `hooks/messages/*.md`, `agents/*.md` and `skills/**/SKILL.md` are read as
+  instructions by a model that has permission to edit files and run commands in
+  the user's project.
 
-Uma alteração maliciosa nesses caminhos não produz um bug: produz execução de
-código e manipulação de agente na máquina de terceiros. É por isso que todo PR
-passa por revisão do mantenedor (`.github/CODEOWNERS`) e pela CI, e que a
-`main` é protegida contra force-push.
+A malicious change in those paths does not produce a bug: it produces code
+execution and agent manipulation on someone else's machine. That is why every PR
+goes through maintainer review (`.github/CODEOWNERS`) and CI, and why `main` is
+protected against force-push.
 
-Caminhos sensíveis, em ordem de risco:
+Sensitive paths, in order of risk:
 
-| Caminho | Por quê |
+| Path | Why |
 | --- | --- |
-| `hooks/*.sh` | executa na máquina do usuário |
-| `hooks/hooks.json` | define o que é executado e quando |
-| `hooks/messages/*.md` | vai direto para o contexto do agente a cada prompt |
-| `agents/*.md`, `skills/**/SKILL.md` | instruem um agente com permissão de escrita |
-| `scripts/build.mjs` | roda na CI e na máquina de quem desenvolve |
+| `hooks/*.sh` | runs on the user's machine |
+| `hooks/hooks.json` | defines what is executed and when |
+| `hooks/messages/*.md` | goes straight into the agent's context on every prompt |
+| `agents/*.md`, `skills/**/SKILL.md` | instruct an agent with write permission |
+| `scripts/build.mjs` | runs in CI and on the developer's machine |
 
-## Versões suportadas
+## Supported versions
 
-Só a versão mais recente da `main` recebe correções. O plugin não mantém
-branches de release.
+Only the latest version on `main` receives fixes. The plugin does not maintain
+release branches.
 
-## Como reportar
+## How to report
 
-**Não abra issue pública** para vulnerabilidade. Use o
-[Private vulnerability reporting](https://github.com/Clevinacio/lightstrator/security/advisories/new)
-do próprio repositório.
+**Do not open a public issue** for a vulnerability. Use the repository's own
+[Private vulnerability reporting](https://github.com/Clevinacio/lightstrator/security/advisories/new).
 
-Inclua: o caminho afetado, o que um atacante conseguiria, e como reproduzir.
+Include: the affected path, what an attacker would gain, and how to reproduce.
 
-Resposta esperada em até 7 dias. Como é um projeto mantido por uma pessoa só,
-não há SLA formal.
+Expect a response within 7 days. Since this is a one-person project, there is no
+formal SLA.
 
-## Escopo
+## Scope
 
-**Dentro do escopo:** qualquer coisa neste repositório que leve a execução de
-código não pretendida, exfiltração de dados do usuário, ou instrução capaz de
-levar um agente a agir contra o interesse de quem instalou.
+**In scope:** anything in this repository that leads to unintended code
+execution, exfiltration of user data, or an instruction capable of leading an
+agent to act against the interest of whoever installed it.
 
-**Fora do escopo:** vulnerabilidades no [caveman](https://github.com/JuliusBrussee/caveman),
-no [superpowers](https://github.com/obra/superpowers), no `rtk` ou no próprio
-CLI hospedeiro — reporte no projeto de origem.
+**Out of scope:** vulnerabilities in [caveman](https://github.com/JuliusBrussee/caveman),
+[superpowers](https://github.com/obra/superpowers), `rtk` or the host CLI
+itself — report those in the originating project.
