@@ -1,12 +1,12 @@
 ---
 name: brainstorming
-description: "Use SEMPRE ao entrar em plan mode, antes de escrever qualquer plano — e antes de qualquer trabalho criativo (criar features, componentes, adicionar funcionalidade, modificar comportamento). Explora intenção do usuário, requisitos e design antes da implementação."
+description: Use ALWAYS when entering plan mode, before writing any plan — and before any creative work (creating features, components, adding functionality, changing behavior) — "nova feature", "novo componente", "adicionar funcionalidade", "mudar comportamento". Explores user intent, requirements and design before implementation.
 ---
 
 <!--
-Derivado de superpowers (https://github.com/obra/superpowers) 6.2.0,
-Copyright (c) 2025 Jesse Vincent, licença MIT. Modificado.
-Ver vendor/superpowers/UPSTREAM.md e NOTICE.
+Derived from superpowers (https://github.com/obra/superpowers) 6.2.0,
+Copyright (c) 2025 Jesse Vincent, MIT license. Modified.
+See vendor/superpowers/UPSTREAM.md and NOTICE.
 -->
 
 # Brainstorming Ideas Into Designs

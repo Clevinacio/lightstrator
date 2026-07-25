@@ -1,22 +1,22 @@
-# Regras globais (opcional)
+# Global rules (optional)
 
-Regras que acompanham o harness mas não são instaladas automaticamente — o
-plugin não pode escrever no seu `CLAUDE.md`. Cole no seu `~/.claude/CLAUDE.md`
-(ou no `AGENTS.md` do CLI equivalente) as que fizerem sentido.
+Rules that ship with the harness but are not installed automatically — the
+plugin cannot write to your `CLAUDE.md`. Paste whichever make sense into your
+`~/.claude/CLAUDE.md` (or the equivalent CLI's `AGENTS.md`).
 
 ```markdown
-EVITE o uso do agente Explore.
+AVOID using the Explore agent.
 
-NUNCA adicionar Co-Authored-By, Claude-Session ou qualquer marcação de
-co-autoria do Claude nos commits.
+NEVER add Co-Authored-By, Claude-Session or any Claude co-authorship marker to
+commits.
 ```
 
-## Por quê
+## Why
 
-**Evitar o `Explore`.** O Lightstrator roteia investigação para o
-`investigator`, que responde comprimido e devolve bem menos tokens ao contexto
-principal. O `Explore` nativo despeja trechos de arquivo e compete com esse
-roteamento — sem essa regra, o modelo tende a alternar entre os dois.
+**Avoiding `Explore`.** Lightstrator routes investigation to the
+`investigator`, which replies compressed and returns far fewer tokens to the
+main context. The native `Explore` dumps file excerpts and competes with that
+routing — without this rule, the model tends to alternate between the two.
 
-**Sem marcação de co-autoria.** Preferência de histórico: os commits saem em
-nome de quem está conduzindo o trabalho, sem rodapé de ferramenta.
+**No co-authorship marker.** History preference: commits go out under the name
+of whoever is driving the work, with no tool footer.
