@@ -5,8 +5,8 @@ on:
     branches: [main]
   pull_request:
 
-# Sem isto o job herda o default do repositório, que pode ser read/write.
-# A CI só lê o checkout — nada aqui precisa escrever no repositório.
+# Without this the job inherits the repository default, which may be read/write.
+# CI only reads the checkout — nothing here needs to write to the repository.
 permissions:
   contents: read
 
@@ -20,49 +20,83 @@ jobs:
         with:
           node-version: '24'
 
-      - name: Artefatos gerados estão em dia
+      - name: Generated artifacts are up to date
         run: node scripts/build.mjs --check
 
-      - name: JSON válido
+      - name: Valid JSON
         run: |
           rc=0
           for f in $(git ls-files '*.json'); do
-            jq empty "$f" || { echo "INVÁLIDO: $f"; rc=1; }
+            jq empty "$f" || { echo "INVALID: $f"; rc=1; }
           done
           exit $rc
 
-      - name: Shell scripts sem erro de sintaxe
+      - name: Shell scripts free of syntax errors
         run: |
           rc=0
           for f in $(git ls-files '*.sh'); do
-            bash -n "$f" || { echo "SINTAXE: $f"; rc=1; }
+            bash -n "$f" || { echo "SYNTAX: $f"; rc=1; }
           done
           exit $rc
 
-      - name: hooks.json tem a estrutura que o Claude Code espera
+      - name: hooks.json has the structure Claude Code expects
         run: |
           rc=0
-          # Os eventos precisam estar aninhados sob a chave "hooks" — no topo, são ignorados.
+          # Events must be nested under the "hooks" key — at the top level they are ignored.
           jq -e '.hooks | objects' hooks/hooks.json >/dev/null || {
-            echo "hooks/hooks.json: falta a chave de topo \"hooks\""; rc=1;
+            echo "hooks/hooks.json: missing top-level \"hooks\" key"; rc=1;
           }
           for k in $(jq -r 'keys[]' hooks/hooks.json); do
-            [ "$k" = "hooks" ] || { echo "chave inesperada no topo: $k"; rc=1; }
+            [ "$k" = "hooks" ] || { echo "unexpected top-level key: $k"; rc=1; }
           done
-          # Todo arquivo referenciado via CLAUDE_PLUGIN_ROOT precisa existir.
+          # Every file referenced via CLAUDE_PLUGIN_ROOT must exist.
           for f in $(jq -r '[.. | .command? // empty] | .[]' hooks/hooks.json \
                      | grep -o '\${CLAUDE_PLUGIN_ROOT}/[^"]*' | sed 's#${CLAUDE_PLUGIN_ROOT}/##'); do
-            test -f "$f" || { echo "hook referencia arquivo inexistente: $f"; rc=1; }
+            test -f "$f" || { echo "hook references a nonexistent file: $f"; rc=1; }
           done
           exit $rc
 
-      - name: Agentes mantêm a integração com o caveman
+      - name: Agents keep the caveman integration
         run: |
           rc=0
           for f in agents/*.md; do
-            grep -q "skill caveman" "$f" || { echo "SEM REFERÊNCIA AO CAVEMAN: $f"; rc=1; }
+            grep -q "skill caveman" "$f" || { echo "MISSING CAVEMAN REFERENCE: $f"; rc=1; }
           done
           grep -q "caveman-review" agents/code-reviewer.md || {
-            echo "code-reviewer perdeu o formato /caveman-review"; rc=1;
+            echo "code-reviewer lost the /caveman-review format"; rc=1;
           }
+          exit $rc
+
+      - name: Bilingual triggers preserved
+        run: |
+          rc=0
+          # The prompts are in English, but the pt-BR triggers are what keeps a
+          # request written in Portuguese routed to the right sub-agent.
+          # Patterns include the surrounding quotes on purpose: bare "implemente"
+          # would also match the English word "implemented" and pass vacuously.
+          check() {
+            grep -qF "$2" "$1" || { echo "MISSING pt-BR trigger $2 in $1"; rc=1; }
+          }
+          check agents/investigator.md '"onde está X"'
+          check agents/investigator.md '"como funciona Y"'
+          check agents/quick-fixer.md '"corrija"'
+          check agents/code-reviewer.md '"revise"'
+          check agents/code-reviewer.md '"revisão"'
+          check agents/code-reviewer.md '"dá uma olhada nisso"'
+          check agents/debugger.md '"deveria funcionar mas não funciona"'
+          check agents/debugger.md '"debuga"'
+          check agents/debugger.md '"teste falhando"'
+          check skills/orchestrator/SKILL.md '"implemente"'
+          check skills/orchestrator/SKILL.md '"investigue"'
+          check skills/orchestrator/SKILL.md '"corrija"'
+          check skills/orchestrator/SKILL.md '"revise"'
+          check skills/orchestrator/SKILL.md '"debuga"'
+          exit $rc
+
+      - name: Bilingual docs present
+        run: |
+          rc=0
+          for f in README CONTRIBUTING docs/PREREQUISITES; do
+            [ -f "$f.md" ] && [ -f "$f.pt-BR.md" ] || { echo "MISSING pair: $f"; rc=1; }
+          done
           exit $rc
