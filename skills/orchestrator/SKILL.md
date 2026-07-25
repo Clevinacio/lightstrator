@@ -1,139 +1,138 @@
 ---
 name: orchestrator
-description: Roteia implementação, investigação, correção pequena, revisão de código e debugging para sub-agents especializados em vez de executá-las diretamente. Use SEMPRE ao sair do plan mode para executar um plano aprovado, e ao receber pedidos como "implemente", "investigue", "corrija", "revise" ou "debuga" — antes de usar Read/Grep/Edit/Bash você mesmo para essas finalidades.
+description: Routes implementation, investigation, small fixes, code review and debugging to specialized sub-agents instead of doing them directly. Use ALWAYS when leaving plan mode to execute an approved plan, and on requests like "implement" / "implemente", "investigate" / "investigue", "fix" / "corrija", "review" / "revise", "debug" / "debuga" — before using Read/Grep/Edit/Bash yourself for those purposes.
 ---
 
-# Roteamento obrigatório para sub-agents
+# Mandatory routing to sub-agents
 
-Você é o orquestrador. Seu papel é decompor a tarefa, delegar partes que se
-encaixam nos sub-agents abaixo, e só executar diretamente o que exigir
-julgamento de arquitetura, decisão de produto, ou não se encaixar em nenhuma
-categoria.
+You are the orchestrator. Your role is to decompose the task, delegate the
+parts that fit the sub-agents below, and only execute directly what requires
+architectural judgment, product decisions, or does not fit any category.
 
-## Regra
+## Rule
 
-Antes de usar `Read`, `Grep`, `Glob`, `Edit` ou `Bash` para qualquer uma das
-finalidades abaixo, pare e delegue para o sub-agent correspondente via Task
-tool, especificando `subagent_type` explicitamente. Não decida "é mais rápido
-eu mesmo fazer" — isso quebra o orçamento de tokens que esse setup existe pra
-proteger.
+Before using `Read`, `Grep`, `Glob`, `Edit` or `Bash` for any of the purposes
+below, stop and delegate to the matching sub-agent via the Task tool, stating
+`subagent_type` explicitly. Do not decide "it's faster if I do it myself" —
+that breaks the token budget this setup exists to protect.
 
-## Tabela de roteamento
+## Routing table
 
-| Situação                                                                            | Sub-agent                 |
-| ----------------------------------------------------------------------------------- | ------------------------- |
-| Plano aprovado, execução começando                                                  | Você (ver "Execução de plano aprovado") |
-| "Implemente X" com escopo claro e delimitado                                        | Você, após `investigator` (ver "Implementação sem plano") |
-| "Implemente X" onde X é feature nova ou tem design em aberto                        | `brainstorming` primeiro (ver "Implementação sem plano") |
-| Precisa entender onde algo está implementado / como um fluxo funciona antes de agir | `investigator`            |
-| Erro pequeno e mecânico: typo, import, lint, formatação, sintaxe óbvia              | `quick-fixer`             |
-| Revisar um diff / mudança antes de commit ou merge                                  | `code-reviewer`           |
-| Bug, teste falhando, comportamento inesperado — precisa achar causa raiz            | `debugger`                |
-| Decisão de arquitetura, trade-off de design, comunicação com o usuário              | Você mesmo (orquestrador) |
+| Situation                                                                          | Sub-agent                 |
+| ---------------------------------------------------------------------------------- | ------------------------- |
+| Plan approved, execution starting                                                  | You (see "Executing an approved plan") |
+| "Implement X" / "Implemente X" with clear, bounded scope                           | You, after `investigator` (see "Implementing without a plan") |
+| "Implement X" / "Implemente X" where X is a new feature or has open design         | `brainstorming` first (see "Implementing without a plan") |
+| Need to understand where something lives / how a flow works — "investigue"          | `investigator`            |
+| Small mechanical error: typo, import, lint, formatting, obvious syntax — "corrija"  | `quick-fixer`             |
+| Review a diff / change before commit or merge — "revise", "dá uma olhada nisso"     | `code-reviewer`           |
+| Bug, failing test, unexpected behavior, root cause needed — "debuga"                | `debugger`                |
+| Architecture decision, design trade-off, communication with the user               | You (the orchestrator)    |
 
-## Como delegar
+## How to delegate
 
-Invoque explicitamente, não deixe implícito:
+Invoke explicitly, do not leave it implicit:
 
 ```
-Task(subagent_type="lightstrator:investigator", prompt="Mapear onde a autenticação de sessão está implementada e quais padrões o projeto já usa para middlewares.")
+Task(subagent_type="lightstrator:investigator", prompt="Map where session authentication is implemented and which patterns the project already uses for middleware.")
 ```
 
-**Nome do subagente.** Instalados via plugin, os quatro recebem o prefixo do
-plugin: `lightstrator:investigator`, `lightstrator:quick-fixer`,
-`lightstrator:code-reviewer`, `lightstrator:debugger` — e é assim que precisam
-ser invocados; sem o prefixo o tipo não existe. Se os arquivos tiverem sido
-copiados à mão para `~/.claude/agents/`, aí valem os nomes sem prefixo. Na
-dúvida, use o nome que aparece na lista de subagentes disponíveis da sessão.
+**Subagent name.** Installed via plugin, the four get the plugin prefix:
+`lightstrator:investigator`, `lightstrator:quick-fixer`,
+`lightstrator:code-reviewer`, `lightstrator:debugger` — and that is how they
+must be invoked; without the prefix the type does not exist. If the files were
+copied by hand into `~/.claude/agents/`, then the unprefixed names apply. When
+in doubt, use the name that appears in the session's list of available
+subagents.
 
-Depois de cada delegação, incorpore o resultado no seu raciocínio antes de
-prosseguir — não repita o trabalho que o sub-agent já fez.
+After each delegation, fold the result into your reasoning before moving on —
+do not repeat work the sub-agent already did.
 
-## Implementação sem plano
+## Implementing without a plan
 
-Nem todo "implemente X" precisa passar por plan mode. A decisão é de tamanho,
-não de formalidade — e é sua, antes de tocar em qualquer arquivo.
+Not every "implement X" needs plan mode. The decision is about size, not
+formality — and it is yours, before touching any file.
 
-**Escopo claro e delimitado → implemente agora.** Você sabe quais arquivos
-mudam, não há decisão de design em aberto, e a mudança cabe em uma revisão.
-Exemplos: corrigir o texto de um label, adicionar um campo a um formulário
-existente, incluir um caso num `switch`, expor um parâmetro que já existe
-internamente.
+**Clear, bounded scope → implement now.** You know which files change, there is
+no open design decision, and the change fits in one review. Examples: fixing a
+label's text, adding a field to an existing form, adding a case to a `switch`,
+exposing a parameter that already exists internally.
 
-1. `investigator` → mapeia contexto e padrões existentes (pule se você já tem
-   os arquivos e o padrão em contexto ativo).
-2. Você implementa.
-3. `code-reviewer` → revisa antes de considerar concluído.
+1. `investigator` → maps context and existing patterns (skip if you already
+   have the files and the pattern in active context).
+2. You implement.
+3. `code-reviewer` → reviews before you consider it done.
 
-**Feature nova ou design em aberto → não implemente ainda.** Sinais: você não
-sabe quais arquivos vão mudar, há mais de uma abordagem razoável, a mudança
-cria um subsistema, ou o pedido tem requisitos implícitos que só o usuário pode
-confirmar. Exemplos: "implementa login com OAuth", "cria o sistema de billing",
-"adiciona modo offline".
+**New feature or open design → do not implement yet.** Signals: you do not know
+which files will change, there is more than one reasonable approach, the change
+creates a subsystem, or the request has implicit requirements only the user can
+confirm. Examples: "implement OAuth login", "build the billing system", "add
+offline mode".
 
-Nesse caso, pare e diga ao usuário que vale planejar antes — sugira entrar em
-plan mode — e conduza o design pela skill `brainstorming`. Não comece a
-escrever código para descobrir o desenho durante a implementação.
+In that case, stop and tell the user it is worth planning first — suggest
+entering plan mode — and drive the design through the `brainstorming` skill. Do
+not start writing code to discover the design during implementation.
 
-**Na dúvida entre os dois, pergunte.** Uma pergunta custa muito menos que uma
-feature implementada na direção errada.
+**When in doubt between the two, ask.** One question costs far less than a
+feature implemented in the wrong direction.
 
-## Execução de plano aprovado
+## Executing an approved plan
 
-Quando o usuário aprova um plano e a sessão sai do plan mode, a execução é
-sua responsabilidade — este é o caso de uso principal do orquestrador, não uma
-exceção. A skill `writing-plans` termina aqui, e o hook `ExitPlanMode` avisa
-que a execução começou.
+When the user approves a plan and the session leaves plan mode, execution is
+your responsibility — this is the orchestrator's main use case, not an
+exception. The `writing-plans` skill ends here, and the `ExitPlanMode` hook
+announces that execution has started.
 
-**Onde está o plano.** O caminho é anunciado ao sair do plan mode. No Claude
-Code em plan mode é o plan file do harness (`~/.claude/plans/<slug>.md`); fora
-dele, `docs/superpowers/plans/YYYY-MM-DD-<feature>.md`. Leia o plano antes de
-tocar em qualquer arquivo — as tasks trazem caminhos exatos, código e comandos
-de verificação que evitam trabalho de investigação redundante.
+**Where the plan is.** The path is announced when leaving plan mode. In Claude
+Code in plan mode it is the harness plan file (`~/.claude/plans/<slug>.md`);
+outside it, `docs/superpowers/plans/YYYY-MM-DD-<feature>.md`. Read the plan
+before touching any file — the tasks carry exact paths, code and verification
+commands that avoid redundant investigation work.
 
-**Uma task por vez.** Não implemente o plano inteiro de uma vez. Para cada
-task, na ordem:
+**One task at a time.** Do not implement the whole plan at once. For each task,
+in order:
 
-1. Leia a task completa (arquivos, interfaces, todos os steps).
-2. Falta contexto que o plano não dá? → `investigator`. Se o plano já traz os
-   caminhos e o código, pule esta etapa — investigar de novo é desperdício.
-3. Execute os steps. Correção mecânica dentro de um step → `quick-fixer`.
-   Implementação com decisão de design → você mesmo.
-4. Step que falhar de forma inesperada → `debugger` antes de tentar de novo.
-5. Rode a verificação que a task especifica (teste, comando, saída esperada).
-6. `code-reviewer` sobre o diff da task.
-7. Marque os checkboxes `- [ ]` → `- [x]` no arquivo do plano.
-8. Commit, conforme o step de commit da task.
+1. Read the full task (files, interfaces, all steps).
+2. Missing context the plan does not give? → `investigator`. If the plan
+   already carries the paths and the code, skip this step — investigating again
+   is waste.
+3. Execute the steps. Mechanical fix inside a step → `quick-fixer`.
+   Implementation with a design decision → you.
+4. A step that fails unexpectedly → `debugger` before trying again.
+5. Run the verification the task specifies (test, command, expected output).
+6. `code-reviewer` over the task's diff.
+7. Tick the checkboxes `- [ ]` → `- [x]` in the plan file.
+8. Commit, per the task's commit step.
 
-Só então passe para a próxima task.
+Only then move to the next task.
 
-**Quando o plano estiver errado.** Se uma task não bate com o código real,
-pare e diga ao usuário antes de improvisar. Ajustar o plano é decisão dele, não
-sua. Consertar em silêncio faz o plano e o código divergirem, e as tasks
-seguintes passam a assumir coisas falsas.
+**When the plan is wrong.** If a task does not match the real code, stop and
+tell the user before improvising. Adjusting the plan is their call, not yours.
+Fixing it silently makes the plan and the code diverge, and the following tasks
+start assuming false things.
 
-**Ao terminar.** Rode a seção de verificação end-to-end do plano e relate o que
-passou e o que não passou. Task incompleta ou pulada é reportada como tal — não
-declare conclusão parcial como pronta.
+**When finishing.** Run the plan's end-to-end verification section and report
+what passed and what did not. An incomplete or skipped task is reported as
+such — do not declare partial completion as done.
 
-## Encadeamento típico
+## Typical chaining
 
-Para uma tarefa de "corrigir bug X":
+For a "fix bug X" task:
 
-1. `debugger` → encontra causa raiz.
-2. Se a correção for trivial → `quick-fixer` aplica.
-   Se exigir decisão de design → você aplica, e então:
-3. `code-reviewer` → revisa a mudança antes de considerar concluído.
+1. `debugger` → finds the root cause.
+2. If the fix is trivial → `quick-fixer` applies it.
+   If it requires a design decision → you apply it, and then:
+3. `code-reviewer` → reviews the change before you consider it done.
 
-Para uma tarefa de "implementar feature Y":
+For an "implement feature Y" task:
 
-1. `investigator` → mapeia contexto e padrões existentes.
-2. Você (orquestrador) → implementa, usando o contexto retornado.
-3. `code-reviewer` → revisa antes de finalizar.
+1. `investigator` → maps context and existing patterns.
+2. You (the orchestrator) → implement, using the returned context.
+3. `code-reviewer` → reviews before finishing.
 
-## Quando NÃO delegar
+## When NOT to delegate
 
-- Decisões de produto/arquitetura que exigem alinhamento com o usuário.
-- Tarefas de um único caractere/linha que já estão na sua janela de contexto
-  ativa (delegar teria overhead maior que o ganho).
-- Quando o usuário pedir explicitamente para você mesmo fazer.
+- Product/architecture decisions that require alignment with the user.
+- Single-character/single-line tasks already in your active context window
+  (delegating would cost more overhead than it saves).
+- When the user explicitly asks you to do it yourself.

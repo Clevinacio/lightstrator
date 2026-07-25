@@ -171,8 +171,8 @@ execution starts by reading that file. Then present the plan for user approval
 (in plan mode, via ExitPlanMode).
 
 Approval ends this skill. Execution happens in-session, immediately after, and
-belongs to the **orquestrador** skill: invoke it and follow its "Execução de
-plano aprovado" section — one task at a time, delegating to `investigator`,
+belongs to the **orchestrator** skill: invoke it and follow its "Executing an
+approved plan" section — one task at a time, delegating to `investigator`,
 `quick-fixer` and `debugger` as each task calls for it, running
 `code-reviewer` and ticking the checkboxes before moving on.
 
