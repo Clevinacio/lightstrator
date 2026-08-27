@@ -9,7 +9,7 @@
     {
       "name": "lightstrator",
       "description": "Orchestration harness: specialized sub-agents, mandatory routing and a brainstorm → plan flow. Requires the caveman plugin.",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "source": "./",
       "author": {
         "name": "Cleverton Inacio"
