@@ -43,6 +43,7 @@ instructions for other CLIs:
 | `quick-fixer` | haiku | Small mechanical error: typo, import, lint, formatting, obvious syntax |
 | `code-reviewer` | sonnet | Review a diff before commit or merge |
 | `debugger` | sonnet | Bug, failing test, unexpected behavior — find the root cause |
+| `executor` | sonnet | Remaining tasks of a plan, from a Handoff Packet — only through `prewalk` |
 
 They all reply in caveman's compressed style: only the result, no narrating the
 process. Code, paths, commands and error messages stay exact.
@@ -54,6 +55,7 @@ process. Code, paths, commands and error messages stay exact.
 | `orchestrator` | Routing table: which situation goes to which sub-agent, and when **not** to delegate |
 | `brainstorming` | Turns an idea into a design through dialogue, one question at a time, before any code |
 | `writing-plans` | Writes the implementation plan from the approved design |
+| `prewalk` | Opt-in cost handoff: you do task 1, `executor` does the rest from a packet |
 
 ### Hooks
 
@@ -101,6 +103,47 @@ a step fails unexpectedly, runs the verification, passes it through
 If a task does not match the real code, execution stops and asks you — the plan
 is not fixed silently.
 
+## Cheaper execution: prewalk
+
+Opt-in: you ask for it — "prewalk", "handoff", "execute this cheaper" — or
+invoke the skill directly as `/lightstrator:prewalk`. A plan costs twice when the same
+repository is read twice — once to plan it, once to execute it. Prewalk pays
+that reading once and hands the result over as a self-contained packet.
+
+```
+main model                                    executor (sonnet)
+  explore + plan
+  task 1: implement + verify
+  write the Handoff Packet ───────────────────▶ tasks 2..N
+                                                 verify each
+  code-reviewer over the COMPLETE diff ◀──────── PREWALK_COMPLETE
+```
+
+The **Handoff Packet** has nine mandatory sections — goal, plan file, files
+read with line ranges, existing patterns copied verbatim, the full todo list,
+task 1's applied diff, the verification already run, the remaining work, and the
+dead ends not to repeat. Task 1's diff is there on purpose: it is the executor's
+worked example of what correct looks like in this repository.
+
+**The review is not moved.** `code-reviewer` runs over the complete diff, task 1
+included, after the executor returns — never inside the executor, never skipped.
+Anything the executor reports as incomplete comes back to the main model.
+
+**Worth it when** the plan has five or more tasks (four or more remaining after
+task 1) and they are mostly mechanical. **Not worth it** for a plan of four
+tasks or fewer, for tasks carrying design decisions the plan does not settle, or
+for anything touching auth, migrations or data deletion. It is never started on
+its own: you ask for it, or the orchestrator offers it once and you decide.
+
+**The saving is in the packet, not in the model.** The executor does not inherit
+the main context — whatever the packet leaves out, it rediscovers by reading
+files again, and at that point the saving is gone. A vague packet makes you pay
+for the plan twice, with a weaker model.
+
+> Claude Code cannot swap a running session's model from a plugin, so this is
+> the subagent handoff, not the "same session, cheaper model" variant described
+> elsewhere. The difference is exactly why the packet has to be self-contained.
+
 ## Direct triggers, without plan mode
 
 The orchestrator hook enters every prompt, so direct requests are routed too —
@@ -112,6 +155,7 @@ you do not need to plan to benefit from the harness.
 | "fix this typo / import" | `quick-fixer` applies it |
 | "review my diff" | `code-reviewer`, one line per finding |
 | "this test is failing" | `debugger` finds the root cause before any fix |
+| "execute this plan cheaper" | `prewalk`: task 1 here, rest to `executor`, full-diff review |
 | "implement X" (clear scope) | `investigator` → implementation → `code-reviewer` |
 | "implement X" (new feature) | stops and suggests plan mode + `brainstorming` |
 

@@ -14,6 +14,17 @@ degrades and how to install on each one.
 | Orchestrator hook | `hooks/hooks.json`, reads the message from the file | `.codex/hooks.json`, message inline in the `echo` | no hooks — becomes fixed text in the context |
 | Plan-mode hook | `plan-mode-reminder.sh` reads `permission_mode` | no plan mode — omitted | omitted |
 | Statusline | `optional/statusline-limit.sh` | n/a | n/a |
+| `prewalk` handoff | native: `executor` runs as a real subagent on a cheaper model | skill file left out of the `AGENTS.md` imports; the orchestrator's handoff section is still there, gated by its "Claude Code only" guard | same, via `GEMINI.md` |
+
+The `executor` agent and the `prewalk` skill are deliberately **not** generated
+into the context files: handing work to a second, cheaper model is the entire
+point, and inline there is no second model to hand it to. `scripts/build.mjs`
+keeps both exclusions, in `NATIVE_ONLY_AGENTS` and `NATIVE_ONLY_SKILLS`, keyed
+on file name so a rename cannot silently re-enable them.
+
+Codex points at the whole `skills/` directory, so `skills/prewalk/SKILL.md` is
+still shipped there — its own "Requires native subagents" section is what keeps
+it inert. Its `Task(...)` calls never run because the CLI has no such tool.
 
 What is lost most outside Claude Code is **context isolation**: with real
 sub-agents, `investigator` sweeps the codebase in a separate window and returns

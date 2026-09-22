@@ -43,6 +43,7 @@ instruções para outros CLIs:
 | `quick-fixer` | haiku | Erro pequeno e mecânico: typo, import, lint, formatação, sintaxe óbvia |
 | `code-reviewer` | sonnet | Revisar um diff antes de commit ou merge |
 | `debugger` | sonnet | Bug, teste falhando, comportamento inesperado — achar causa raiz |
+| `executor` | sonnet | Tarefas restantes de um plano, a partir de um Handoff Packet — só via `prewalk` |
 
 Todos respondem no estilo comprimido do caveman: só o resultado, sem narrar
 processo. Código, caminhos, comandos e mensagens de erro ficam exatos.
@@ -54,6 +55,7 @@ processo. Código, caminhos, comandos e mensagens de erro ficam exatos.
 | `orchestrator` | Tabela de roteamento: qual situação vai para qual subagente, e quando **não** delegar |
 | `brainstorming` | Transforma ideia em design por diálogo, uma pergunta por vez, antes de qualquer código |
 | `writing-plans` | Escreve o plano de implementação a partir do design aprovado |
+| `prewalk` | Handoff opt-in de custo: você faz a task 1, o `executor` faz o resto a partir de um packet |
 
 ### Hooks
 
@@ -101,6 +103,50 @@ o checkbox e commita. Só então vai para a próxima.
 Se uma task não bater com o código real, a execução para e te consulta — o
 plano não é corrigido em silêncio.
 
+## Execução mais barata: prewalk
+
+Opt-in: você pede — "prewalk", "handoff", "executa mais barato" — ou invoca a
+skill direto como `/lightstrator:prewalk`. Um plano custa duas vezes quando
+o mesmo repositório é lido duas vezes — uma para planejar, outra para executar.
+O prewalk paga essa leitura uma vez e entrega o resultado como um packet
+autocontido.
+
+```
+modelo principal                              executor (sonnet)
+  explora + planeja
+  task 1: implementa + verifica
+  escreve o Handoff Packet ───────────────────▶ tasks 2..N
+                                                 verifica cada uma
+  code-reviewer sobre o diff COMPLETO ◀───────── PREWALK_COMPLETE
+```
+
+O **Handoff Packet** tem nove seções obrigatórias — objetivo, arquivo do plano,
+arquivos lidos com faixas de linha, padrões existentes copiados literalmente, a
+lista completa de tarefas, o diff já aplicado da task 1, a verificação já
+rodada, o trabalho restante e os becos sem saída a não repetir. O diff da task 1
+está ali de propósito: é o exemplo resolvido do que é "certo" neste repositório.
+
+**A revisão não muda de lugar.** O `code-reviewer` roda sobre o diff completo,
+task 1 incluída, depois que o executor retorna — nunca dentro do executor, nunca
+pulada. O que o executor reportar como incompleto volta para o modelo principal.
+
+**Vale a pena quando** o plano tem cinco ou mais tarefas (quatro ou mais
+restantes depois da task 1) e elas são majoritariamente mecânicas. **Não vale**
+para um plano de quatro tarefas ou menos, para tarefas com decisão de design que
+o plano não resolve, nem para nada que toque em auth, migrações ou remoção de
+dados. Nunca começa sozinho: ou você pede, ou o orchestrator oferece uma vez e
+você decide.
+
+**A economia está no packet, não no modelo.** O executor não herda o contexto
+principal — o que o packet deixar de fora, ele redescobre relendo arquivos, e aí
+a economia acabou. Um packet vago faz você pagar o plano duas vezes, com um
+modelo mais fraco.
+
+> O Claude Code não troca o modelo de uma sessão em andamento a partir de um
+> plugin, então isto é o handoff para subagente, não a variante "mesma sessão,
+> modelo mais barato" descrita em outros lugares. É exatamente por isso que o
+> packet precisa ser autocontido.
+
 ## Gatilhos diretos, sem plan mode
 
 O hook do orchestrator entra em todo prompt, então pedidos diretos também são
@@ -112,6 +158,7 @@ roteados — não é preciso planejar para se beneficiar do harness.
 | "corrige esse typo / import" | `quick-fixer` aplica |
 | "revisa meu diff" | `code-reviewer`, uma linha por achado |
 | "esse teste tá falhando" | `debugger` acha a causa raiz antes de qualquer correção |
+| "executa esse plano mais barato" | `prewalk`: task 1 aqui, resto no `executor`, review do diff completo |
 | "implementa X" (escopo claro) | `investigator` → implementação → `code-reviewer` |
 | "implementa X" (feature nova) | para e sugere plan mode + `brainstorming` |
 

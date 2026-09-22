@@ -49,6 +49,14 @@ function parseFrontmatter(text) {
   return fields;
 }
 
+// Agents and skills that only make sense with real subagents: the whole point
+// is handing work to a second, cheaper model. A CLI without native subagents has
+// nobody to hand it to, so they are left out of the generated context files.
+// Keyed on the file name, not the frontmatter name, so a rename cannot silently
+// re-enable them.
+const NATIVE_ONLY_AGENTS = new Set(['executor.md']);
+const NATIVE_ONLY_SKILLS = new Set(['prewalk']);
+
 function readAgents() {
   return readdirSync(join(ROOT, 'agents'))
     .filter((f) => f.endsWith('.md'))
@@ -70,9 +78,13 @@ const readMessage = (name) => read(join('hooks', 'messages', `${name}.md`)).trim
  * Serves both Codex/Antigravity (AGENTS.md) and Gemini (GEMINI.md).
  */
 function buildContextFile({ skills, agents, orchestrator, planApproved }) {
-  const imports = skills.map((s) => `@./skills/${s}/SKILL.md`).join('\n');
+  const imports = skills
+    .filter((s) => !NATIVE_ONLY_SKILLS.has(s))
+    .map((s) => `@./skills/${s}/SKILL.md`)
+    .join('\n');
 
   const personas = agents
+    .filter((a) => !NATIVE_ONLY_AGENTS.has(a.file))
     .map(
       (a) =>
         `### ${a.name}\n\n` +

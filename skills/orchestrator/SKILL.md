@@ -27,6 +27,9 @@ that breaks the token budget this setup exists to protect.
 | Small mechanical error: typo, import, lint, formatting, obvious syntax — "corrija"  | `quick-fixer`             |
 | Review a diff / change before commit or merge — "revise", "dá uma olhada nisso"     | `code-reviewer`           |
 | Bug, failing test, unexpected behavior, root cause needed — "debuga"                | `debugger`                |
+| User asks to execute a plan cheaper — "prewalk", "handoff", "mais barato"          | `prewalk` skill (see "Handing a plan off") |
+| Plan with 5+ mostly mechanical tasks, and cost matters                             | Offer `prewalk` once — the user decides |
+| Remaining tasks of a plan, after a Handoff Packet exists                           | `executor` (only via `prewalk`) |
 | Architecture decision, design trade-off, communication with the user               | You (the orchestrator)    |
 
 ## How to delegate
@@ -37,9 +40,10 @@ Invoke explicitly, do not leave it implicit:
 Task(subagent_type="lightstrator:investigator", prompt="Map where session authentication is implemented and which patterns the project already uses for middleware.")
 ```
 
-**Subagent name.** Installed via plugin, the four get the plugin prefix:
+**Subagent name.** Installed via plugin, the five get the plugin prefix:
 `lightstrator:investigator`, `lightstrator:quick-fixer`,
-`lightstrator:code-reviewer`, `lightstrator:debugger` — and that is how they
+`lightstrator:code-reviewer`, `lightstrator:debugger`,
+`lightstrator:executor` — and that is how they
 must be invoked; without the prefix the type does not exist. If the files were
 copied by hand into `~/.claude/agents/`, then the unprefixed names apply. When
 in doubt, use the name that appears in the session's list of available
@@ -114,6 +118,31 @@ start assuming false things.
 **When finishing.** Run the plan's end-to-end verification section and report
 what passed and what did not. An incomplete or skipped task is reported as
 such — do not declare partial completion as done.
+
+## Handing a plan off (prewalk)
+
+**Claude Code only.** This needs `executor` to run as a real subagent on its
+own model. On a CLI without native subagents, ignore this section and execute
+the plan the normal way.
+
+There is a cheaper way to execute a plan, and it is **opt-in**: the `prewalk`
+skill. You implement and verify task 1, write a Handoff Packet, and the
+`executor` agent (Sonnet) does the remaining tasks from that packet instead of
+reading the repository again. You still run `code-reviewer` over the complete
+diff at the end — that review does not move to the executor and is not skipped.
+
+Use it when the user asks for it ("prewalk", "handoff", "executa com modelo mais
+barato"). When the approved plan has **five or more tasks** that are mostly
+mechanical, you may offer it once, in one line, and let the user decide. Never
+switch to it on your own, and never offer it for a plan of four tasks or
+fewer — below that the packet costs more than it saves.
+
+Everything else — when it is worth it, the packet's mandatory sections, how to
+close it out — lives in the `prewalk` skill. Invoke it instead of improvising a
+handoff: a packet written from memory sends the executor back to reading files,
+which is the one thing this flow exists to avoid.
+
+Without prewalk, execute the plan the normal way, as described above.
 
 ## Typical chaining
 
