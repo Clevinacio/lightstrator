@@ -33,7 +33,9 @@ jobs:
       # trigger, so run the real CI on the release branch.
       - if: steps.release.outputs.pr
         name: Run CI on the release PR
+        # Step env is evaluated even when `if` is false, so fromJSON() on the
+        # empty output breaks the template; parse the JSON in the shell instead.
         env:
           GH_TOKEN: ${{ github.token }}
-          BRANCH: ${{ fromJSON(steps.release.outputs.pr).headBranchName }}
-        run: gh workflow run ci.yml --repo "$GITHUB_REPOSITORY" --ref "$BRANCH"
+          PR: ${{ steps.release.outputs.pr }}
+        run: gh workflow run ci.yml --repo "$GITHUB_REPOSITORY" --ref "$(jq -r .headBranchName <<<"$PR")"
