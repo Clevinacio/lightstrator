@@ -8,7 +8,8 @@
  *
  * Generated (do NOT edit by hand):
  *   AGENTS.md, GEMINI.md, gemini-extension.json,
- *   .codex-plugin/plugin.json, .codex/hooks.json, .codex/config.toml
+ *   .codex-plugin/plugin.json, .codex/hooks.json, .codex/config.toml,
+ *   omp/rules/lightstrator.md, omp/skills/orchestrator/SKILL.md, omp/agents/*.md
  *   + "version" field propagated to every manifest
  *
  * Usage:
@@ -53,7 +54,12 @@ function readAgents() {
   return readdirSync(join(ROOT, 'agents'))
     .filter((f) => f.endsWith('.md'))
     .sort()
-    .map((file) => ({ file, ...parseFrontmatter(read(join('agents', file))) }));
+    .map((file) => {
+      const raw = read(join('agents', file));
+      const frontmatter = parseFrontmatter(raw);
+      const body = raw.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n/, '');
+      return { ...frontmatter, file, frontmatter, body };
+    });
 }
 
 function listSkills() {
@@ -143,15 +149,107 @@ function buildCodexHooks(orchestrator) {
   // The plan-mode hook is omitted: Codex has no plan mode.
 }
 
+// Throws instead of silently no-opping when the canonical text is reworded.
+function mustReplace(text, from, to) {
+  const found = typeof from === 'string' ? text.includes(from) : from.test(text);
+  if (!found) throw new Error(`omp adapter: canonical text not found: ${from}`);
+  return text.replace(from, to);
+}
+
+function mapOrThrow(map, key, what) {
+  if (!Object.hasOwn(map, key)) throw new Error(`omp adapter: no mapping for ${what} "${key}"`);
+  return map[key];
+}
+
+const OMP_TOOLS = { Read: 'read', Grep: 'grep', Glob: 'glob', Edit: 'edit', Write: 'write', Bash: 'bash' };
+// null = no model line: omp then runs the agent on the parent's active model, like Claude's `inherit`.
+const OMP_MODELS = { haiku: '@smol', sonnet: '@task', opus: '@task', inherit: null };
+// read-summarize: false makes omp's read return verbatim code instead of structural summaries.
+const OMP_AGENT_EXTRAS = { investigator: { 'read-summarize': 'false' } };
+
+function buildOmpAgents(agents) {
+  const outputs = {};
+  for (const a of agents) {
+    const { name, description, tools = '', model } = a.frontmatter;
+    const ompTools = tools
+      .split(',')
+      .map((t) => mapOrThrow(OMP_TOOLS, t.trim(), 'tool'))
+      .join(', ');
+    const extras = Object.entries(OMP_AGENT_EXTRAS[name] || {})
+      .map(([k, v]) => `\n${k}: ${v}`)
+      .join('');
+
+    const ompModel = mapOrThrow(OMP_MODELS, model, 'model');
+    const modelLine = ompModel ? `\nmodel: "${ompModel}"` : '';
+
+    outputs[`omp/agents/${a.file}`] = `---
+name: ${name}
+description: ${JSON.stringify(description)}
+tools: ${ompTools}${modelLine}${extras}
+---
+
+${BANNER}
+
+${a.body.trim()}
+`;
+  }
+  return outputs;
+}
+
+function buildOmpOrchestratorSkill() {
+  let s = read(join('skills', 'orchestrator', 'SKILL.md'));
+  s = mustReplace(s, 'before using Read/Grep/Edit/Bash yourself', 'before using read/grep/edit/bash yourself');
+  s = mustReplace(
+    s,
+    'Before using `Read`, `Grep`, `Glob`, `Edit` or `Bash`',
+    'Before using `read`, `grep`, `glob`, `edit` or `bash`'
+  );
+  s = mustReplace(s, 'via the Task tool, stating\n`subagent_type` explicitly.', 'via the `task` tool, stating\n`agent` explicitly.');
+  s = mustReplace(
+    s,
+    '```\nTask(subagent_type="lightstrator:investigator", prompt="Map where session authentication is implemented and which patterns the project already uses for middleware.")\n```',
+    '```json\n{\n  "context": "Investigation or execution goal",\n  "tasks": [{\n    "agent": "investigator",\n    "task": "Map where session authentication is implemented and which patterns the project already uses for middleware."\n  }]\n}\n```'
+  );
+  s = mustReplace(
+    s,
+    /\*\*Subagent name\.\*\* Installed via plugin, the four get the plugin prefix:[\s\S]*?subagents\./,
+    '**Subagent names.** In omp the four have no plugin prefix: `investigator`,\n`quick-fixer`, `code-reviewer`, `debugger`.'
+  );
+  s = mustReplace(
+    s,
+    'The path is announced when leaving plan mode. In Claude\nCode in plan mode it is the harness plan file (`~/.claude/plans/<slug>.md`);\noutside it, `docs/superpowers/plans/YYYY-MM-DD-<feature>.md`.',
+    'In omp it is\n`docs/superpowers/plans/YYYY-MM-DD-<feature>.md` unless the user chose\nanother location.'
+  );
+  s = mustReplace(s, ', and the `ExitPlanMode` hook\nannounces that execution has started', '');
+  return s.replace(/^(---\r?\n[\s\S]*?\r?\n---\r?\n)/, `$1\n${BANNER}\n`);
+}
+
+// omp does not run Claude Code's shell hooks; an alwaysApply rule is injected
+// in full on every request, which is what the UserPromptSubmit hook achieves.
+function buildOmpRule(orchestrator) {
+  let body = mustReplace(orchestrator, 'before using Read/Grep/Edit/Bash yourself', 'before using read/grep/glob/edit/bash yourself');
+  body = mustReplace(body, 'Delegate via Task(subagent_type="lightstrator:<name>").', 'Delegate via the `task` tool with `agent: "<name>"`.');
+  return `---
+description: Lightstrator routing — delegate investigation, fixes, reviews and debugging to its sub-agents.
+alwaysApply: true
+---
+
+${BANNER}
+
+${body}
+`;
+}
+
 function build() {
   const pkg = readJson('package.json');
   const plugin = readJson('.claude-plugin/plugin.json');
   const marketplace = readJson('.claude-plugin/marketplace.json');
   const { version } = pkg;
 
+  const agents = readAgents();
   const context = buildContextFile({
     skills: listSkills(),
-    agents: readAgents(),
+    agents,
     orchestrator: readMessage('orchestrator'),
     planApproved: readMessage('plan-approved'),
   });
@@ -193,6 +291,9 @@ function build() {
     '.codex-plugin/plugin.json': json(codexPlugin),
     '.codex/hooks.json': json(buildCodexHooks(readMessage('orchestrator'))),
     '.codex/config.toml': '[features]\nhooks = true\n',
+    'omp/rules/lightstrator.md': buildOmpRule(readMessage('orchestrator')),
+    'omp/skills/orchestrator/SKILL.md': buildOmpOrchestratorSkill(),
+    ...buildOmpAgents(agents),
   };
 }
 

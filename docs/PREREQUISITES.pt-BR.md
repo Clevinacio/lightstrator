@@ -26,6 +26,14 @@ Repositório: https://github.com/JuliusBrussee/caveman
 Outros CLIs: o caveman traz `.codex/` e `GEMINI.md` próprios — siga as
 instruções do repositório dele para o seu CLI.
 
+Oh My Pi: copie as skills do caveman para o diretório nativo de skills do omp:
+
+```bash
+git clone https://github.com/JuliusBrussee/caveman.git
+mkdir -p ~/.omp/agent/skills
+cp -r caveman/skills/* ~/.omp/agent/skills/
+```
+
 > **Sem o caveman**, os agentes ainda carregam e funcionam: cada um traz um
 > bloco de fallback com as regras de compressão aplicadas diretamente. É modo
 > degradado — o output fica mais verboso que no caminho suportado.

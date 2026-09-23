@@ -7,10 +7,11 @@ sair lendo e editando arquivos sozinho, ele roteia o trabalho para subagentes
 especializados que respondem comprimido. O contexto principal dura muito mais
 numa sessão longa.
 
-Funciona no **Claude Code** (nativo), **Codex CLI** e **Gemini CLI /
-Antigravity** (personas + contexto). Os prompts são em inglês, mas os gatilhos
-de ativação são bilíngues — pedidos em português continuam sendo roteados, e o
-agente responde no idioma em que você escreve.
+Funciona no **Claude Code** (nativo), **Oh My Pi** (subagentes nativos + regra
+sempre ativa), **Codex CLI** e **Gemini CLI / Antigravity** (personas +
+contexto). Os prompts são em inglês, mas os gatilhos de ativação são bilíngues
+— pedidos em português continuam sendo roteados, e o agente responde no idioma
+em que você escreve.
 
 ## Instalação
 
@@ -32,6 +33,9 @@ Depois o Lightstrator:
 Também é preciso ter o `jq` no PATH. Detalhes, opcionais (`rtk`, statusline) e
 instruções para outros CLIs:
 [`docs/PREREQUISITES.pt-BR.md`](docs/PREREQUISITES.pt-BR.md).
+
+No Oh My Pi, a instalação é por cópia dos arquivos gerados em `omp/` — veja
+[`docs/PORTING.md`](docs/PORTING.md#oh-my-pi-omp).
 
 ## O que vem no pacote
 

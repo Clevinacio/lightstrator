@@ -7,13 +7,13 @@ degrades and how to install on each one.
 
 ## Degradation matrix
 
-| Capability | Claude Code | Codex CLI | Gemini / Antigravity |
-| --- | --- | --- | --- |
-| Sub-agents | native `agents/*.md`, with their own model and tools | `## Personas` section in `AGENTS.md` — the model takes on the role inline | same, via `GEMINI.md` |
-| Skills | native `skills/`, loaded on demand | `.codex-plugin/plugin.json` → `"skills": "./skills/"` | `@import` at the top of `GEMINI.md` |
-| Orchestrator hook | `hooks/hooks.json`, reads the message from the file | `.codex/hooks.json`, message inline in the `echo` | no hooks — becomes fixed text in the context |
-| Plan-mode hook | `plan-mode-reminder.sh` reads `permission_mode` | no plan mode — omitted | omitted |
-| Statusline | `optional/statusline-limit.sh` | n/a | n/a |
+| Capability | Claude Code | Oh My Pi (omp) | Codex CLI | Gemini / Antigravity |
+| --- | --- | --- | --- | --- |
+| Sub-agents | native `agents/*.md`, with their own model and tools | native `omp/agents/*.md`, with role models and context isolation | `## Personas` section in `AGENTS.md` — the model takes on the role inline | same, via `GEMINI.md` |
+| Skills | native `skills/`, loaded on demand | native `~/.omp/agent/skills/`, loaded on demand | `.codex-plugin/plugin.json` → `"skills": "./skills/"` | `@import` at the top of `GEMINI.md` |
+| Orchestrator hook | `hooks/hooks.json`, reads the message from the file | `alwaysApply` rule `omp/rules/lightstrator.md`, injected on every request | `.codex/hooks.json`, message inline in the `echo` | no hooks — becomes fixed text in the context |
+| Plan-mode hook | `plan-mode-reminder.sh` reads `permission_mode` | no hook — the `brainstorming`/`writing-plans` triggers and the orchestrator's "Executing an approved plan" section cover it | no plan mode — omitted | omitted |
+| Statusline | `optional/statusline-limit.sh` | n/a | n/a | n/a |
 
 What is lost most outside Claude Code is **context isolation**: with real
 sub-agents, `investigator` sweeps the codebase in a separate window and returns
@@ -48,6 +48,41 @@ imports the skills and carries the routing and the personas.
 
 Antigravity reads `AGENTS.md` — same content, generated in the same build.
 
+### Oh My Pi (omp)
+
+omp has native sub-agents with context isolation (via the `task` tool) and
+native skills, so nothing degrades into personas. It does not run Claude Code's
+shell hooks: the orchestrator message becomes an `alwaysApply` rule instead,
+which omp injects in full on every request. The build generates the
+omp-specific pieces under `omp/`: the sub-agents (lowercase tools; `haiku` →
+role `@smol`, `sonnet`/`opus` → `@task`, `inherit` → no model line, so the
+parent's model is used), the orchestrator skill (delegation via the `task`
+tool) and the rule.
+
+Install caveman's skills first (see `PREREQUISITES.md`). Then, from a clone of
+this repository, install in user scope:
+
+```bash
+git clone https://github.com/Clevinacio/lightstrator.git && cd lightstrator
+
+# 1. Sub-agents
+mkdir -p ~/.omp/agent/agents
+cp omp/agents/*.md ~/.omp/agent/agents/
+
+# 2. Skills (canonical ones, then the omp orchestrator on top)
+mkdir -p ~/.omp/agent/skills
+cp -r skills/* ~/.omp/agent/skills/
+cp omp/skills/orchestrator/SKILL.md ~/.omp/agent/skills/orchestrator/
+
+# 3. Routing rule
+mkdir -p ~/.omp/agent/rules
+cp omp/rules/lightstrator.md ~/.omp/agent/rules/
+```
+
+New sessions pick everything up. Every step is a plain copy, so updating is
+`git pull` and running the three steps again. `writing-plans` is installed as
+is: it still mentions Claude Code's `ExitPlanMode`, which omp ignores.
+
 ## Generated files
 
 Do not edit by hand:
@@ -55,6 +90,7 @@ Do not edit by hand:
 ```
 AGENTS.md  GEMINI.md  gemini-extension.json
 .codex-plugin/plugin.json  .codex/hooks.json  .codex/config.toml
+omp/rules/lightstrator.md  omp/skills/orchestrator/SKILL.md  omp/agents/*.md
 ```
 
 They all come out of `scripts/build.mjs` from the canonical source (`agents/`,
