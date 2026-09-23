@@ -24,6 +24,7 @@ Never edit (they are rewritten by the build):
 
 ```
 AGENTS.md  GEMINI.md  gemini-extension.json  .codex-plugin/  .codex/
+.omp-plugin/  omp/
 ```
 
 After touching the canonical source:

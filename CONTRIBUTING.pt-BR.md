@@ -23,6 +23,7 @@ Nunca edite (são reescritos pelo build):
 
 ```
 AGENTS.md  GEMINI.md  gemini-extension.json  .codex-plugin/  .codex/
+.omp-plugin/  omp/
 ```
 
 Depois de mexer na fonte canônica:
