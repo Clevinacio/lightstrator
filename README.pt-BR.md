@@ -34,7 +34,7 @@ Também é preciso ter o `jq` no PATH. Detalhes, opcionais (`rtk`, statusline) e
 instruções para outros CLIs:
 [`docs/PREREQUISITES.pt-BR.md`](docs/PREREQUISITES.pt-BR.md).
 
-No Oh My Pi, a instalação é por cópia dos arquivos gerados em `omp/` — veja
+No Oh My Pi, o mesmo par `add`/`install` funciona via `/marketplace` — veja
 [`docs/PORTING.md`](docs/PORTING.md#oh-my-pi-omp).
 
 ## O que vem no pacote

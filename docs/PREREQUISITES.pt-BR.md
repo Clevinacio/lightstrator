@@ -26,12 +26,12 @@ Repositório: https://github.com/JuliusBrussee/caveman
 Outros CLIs: o caveman traz `.codex/` e `GEMINI.md` próprios — siga as
 instruções do repositório dele para o seu CLI.
 
-Oh My Pi: copie as skills do caveman para o diretório nativo de skills do omp:
+O Oh My Pi lê o marketplace do Claude Code do caveman como está (as skills e os
+agentes `cavecrew-*` carregam; os hooks em shell dele não rodam):
 
-```bash
-git clone https://github.com/JuliusBrussee/caveman.git
-mkdir -p ~/.omp/agent/skills
-cp -r caveman/skills/* ~/.omp/agent/skills/
+```
+/marketplace add JuliusBrussee/caveman
+/marketplace install caveman@caveman
 ```
 
 > **Sem o caveman**, os agentes ainda carregam e funcionam: cada um traz um
