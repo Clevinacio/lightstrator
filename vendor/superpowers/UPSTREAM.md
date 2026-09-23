@@ -66,6 +66,20 @@ Files identical to upstream (no modification):
   delegating to the sub-agents. Includes the explicit prohibition against
   implementing straight from this skill or executing the whole plan in one pass.
 
+### Oh My Pi copies (`omp/skills/`, generated)
+
+`scripts/build.mjs` copies both skill trees into `omp/skills/` for the omp
+plugin, with these changes on top of the ones above:
+
+- **`writing-plans/SKILL.md`** — dropped the Claude Code plan-file path
+  (`~/.claude/plans/<slug>.md`) and the "via `ExitPlanMode`" approval step,
+  which do not exist in omp.
+- **`brainstorming/SKILL.md`** — the visual companion guide is referenced as
+  `skill://brainstorming/visual-companion.md`, the path omp resolves.
+- **Both `SKILL.md`** — a "generated, do not edit" banner after the frontmatter.
+
+Every other file is copied byte for byte.
+
 ## How to verify
 
 ```bash

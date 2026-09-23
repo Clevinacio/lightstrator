@@ -26,6 +26,14 @@ Repositório: https://github.com/JuliusBrussee/caveman
 Outros CLIs: o caveman traz `.codex/` e `GEMINI.md` próprios — siga as
 instruções do repositório dele para o seu CLI.
 
+O Oh My Pi lê o marketplace do Claude Code do caveman como está (as skills e os
+agentes `cavecrew-*` carregam; os hooks em shell dele não rodam):
+
+```
+/marketplace add JuliusBrussee/caveman
+/marketplace install caveman@caveman
+```
+
 > **Sem o caveman**, os agentes ainda carregam e funcionam: cada um traz um
 > bloco de fallback com as regras de compressão aplicadas diretamente. É modo
 > degradado — o output fica mais verboso que no caminho suportado.

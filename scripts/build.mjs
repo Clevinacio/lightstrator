@@ -3,12 +3,13 @@
  * Generates the adapters for non-native CLIs from the canonical source.
  *
  * Canonical source (edited by hand):
- *   agents/*.md, skills/<name>/SKILL.md, hooks/messages/*.md,
- *   .claude-plugin/plugin.json, package.json
+ *   agents/*.md, skills/<name>/**, hooks/messages/*.md,
+ *   .claude-plugin/plugin.json, .claude-plugin/marketplace.json, package.json
  *
  * Generated (do NOT edit by hand):
  *   AGENTS.md, GEMINI.md, gemini-extension.json,
- *   .codex-plugin/plugin.json, .codex/hooks.json, .codex/config.toml
+ *   .codex-plugin/plugin.json, .codex/hooks.json, .codex/config.toml,
+ *   .omp-plugin/marketplace.json, omp/agents/*.md, omp/rules/lightstrator.md, omp/skills/**
  *   + "version" field propagated to every manifest
  *
  * Usage:
@@ -16,7 +17,7 @@
  *   node scripts/build.mjs --check    compares only; exits 1 if they diverge
  */
 
-import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync, statSync, chmodSync, unlinkSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -53,7 +54,12 @@ function readAgents() {
   return readdirSync(join(ROOT, 'agents'))
     .filter((f) => f.endsWith('.md'))
     .sort()
-    .map((file) => ({ file, ...parseFrontmatter(read(join('agents', file))) }));
+    .map((file) => {
+      const raw = read(join('agents', file));
+      const frontmatter = parseFrontmatter(raw);
+      const body = raw.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n/, '');
+      return { ...frontmatter, file, frontmatter, body };
+    });
 }
 
 function listSkills() {
@@ -143,15 +149,154 @@ function buildCodexHooks(orchestrator) {
   // The plan-mode hook is omitted: Codex has no plan mode.
 }
 
+// Throws instead of silently no-opping when the canonical text is reworded.
+function mustReplace(text, from, to) {
+  const found = typeof from === 'string' ? text.includes(from) : from.test(text);
+  if (!found) throw new Error(`omp adapter: canonical text not found: ${from}`);
+  return text.replace(from, to);
+}
+
+function mapOrThrow(map, key, what) {
+  if (!Object.hasOwn(map, key)) throw new Error(`omp adapter: no mapping for ${what} "${key}"`);
+  return map[key];
+}
+
+const OMP_TOOLS = { Read: 'read', Grep: 'grep', Glob: 'glob', Edit: 'edit', Write: 'write', Bash: 'bash' };
+// null = no model line: omp then runs the agent on the parent's active model, like Claude's `inherit`.
+const OMP_MODELS = { haiku: '@smol', sonnet: '@task', opus: '@task', inherit: null };
+// read-summarize: false makes omp's read return verbatim code instead of structural summaries.
+const OMP_AGENT_EXTRAS = { investigator: { 'read-summarize': 'false' } };
+
+function buildOmpAgents(agents) {
+  const outputs = {};
+  for (const a of agents) {
+    const { name, description, tools = '', model } = a.frontmatter;
+    const ompTools = tools
+      .split(',')
+      .map((t) => mapOrThrow(OMP_TOOLS, t.trim(), 'tool'))
+      .join(', ');
+    const extras = Object.entries(OMP_AGENT_EXTRAS[name] || {})
+      .map(([k, v]) => `\n${k}: ${v}`)
+      .join('');
+
+    const ompModel = mapOrThrow(OMP_MODELS, model, 'model');
+    const modelLine = ompModel ? `\nmodel: "${ompModel}"` : '';
+
+    outputs[`omp/agents/${a.file}`] = `---
+name: ${name}
+description: ${JSON.stringify(description)}
+tools: ${ompTools}${modelLine}${extras}
+---
+
+${BANNER}
+
+${a.body.trim()}
+`;
+  }
+  return outputs;
+}
+
+function adaptOmpOrchestratorSkill(s) {
+  s = mustReplace(s, 'before using Read/Grep/Edit/Bash yourself', 'before using read/grep/edit/bash yourself');
+  s = mustReplace(
+    s,
+    'Before using `Read`, `Grep`, `Glob`, `Edit` or `Bash`',
+    'Before using `read`, `grep`, `glob`, `edit` or `bash`'
+  );
+  s = mustReplace(s, 'via the Task tool, stating\n`subagent_type` explicitly.', 'via the `task` tool, stating\n`agent` explicitly.');
+  s = mustReplace(
+    s,
+    '```\nTask(subagent_type="lightstrator:investigator", prompt="Map where session authentication is implemented and which patterns the project already uses for middleware.")\n```',
+    '```json\n{\n  "context": "Investigation or execution goal",\n  "tasks": [{\n    "agent": "investigator",\n    "task": "Map where session authentication is implemented and which patterns the project already uses for middleware."\n  }]\n}\n```'
+  );
+  s = mustReplace(
+    s,
+    /\*\*Subagent name\.\*\* Installed via plugin, the four get the plugin prefix:[\s\S]*?subagents\./,
+    '**Subagent names.** In omp the four have no plugin prefix: `investigator`,\n`quick-fixer`, `code-reviewer`, `debugger`.'
+  );
+  s = mustReplace(
+    s,
+    'The path is announced when leaving plan mode. In Claude\nCode in plan mode it is the harness plan file (`~/.claude/plans/<slug>.md`);\noutside it, `docs/superpowers/plans/YYYY-MM-DD-<feature>.md`.',
+    'In omp it is\n`docs/superpowers/plans/YYYY-MM-DD-<feature>.md` unless the user chose\nanother location.'
+  );
+  s = mustReplace(s, ', and the `ExitPlanMode` hook\nannounces that execution has started', '');
+  return s;
+}
+
+function adaptOmpWritingPlansSkill(s) {
+  s = mustReplace(
+    s,
+    'session\n  (in Claude Code, `~/.claude/plans/<slug>.md` — it is the only file you are\n  allowed to edit while planning). Do NOT',
+    'session.\n  Do NOT'
+  );
+  return mustReplace(s, 'Then present the plan for user approval\n(in plan mode, via ExitPlanMode).', 'Then present the plan for user approval.');
+}
+
+function adaptOmpBrainstormingSkill(s) {
+  return mustReplace(s, '`skills/brainstorming/visual-companion.md`', '`skill://brainstorming/visual-companion.md`');
+}
+
+const OMP_SKILL_ADAPTERS = {
+  orchestrator: adaptOmpOrchestratorSkill,
+  brainstorming: adaptOmpBrainstormingSkill,
+  'writing-plans': adaptOmpWritingPlansSkill,
+};
+
+// Paths are always '/'-joined so output keys match on every OS.
+function listFilesRecursive(relDir) {
+  return readdirSync(join(ROOT, relDir), { withFileTypes: true }).flatMap((d) =>
+    d.isDirectory() ? listFilesRecursive(`${relDir}/${d.name}`) : [`${relDir}/${d.name}`]
+  );
+}
+
+// git only tracks the executable bit, so compare modes the way git sees them.
+const gitMode = (path) => (statSync(path).mode & 0o111 ? 0o755 : 0o644);
+
+// Whole skill trees are copied (the omp plugin root cannot reach ../skills once
+// cached), keeping the executable bit of the brainstorming scripts.
+function buildOmpSkills() {
+  const outputs = {};
+  for (const skill of listSkills()) {
+    const adapt = OMP_SKILL_ADAPTERS[skill];
+    if (!adapt) throw new Error(`omp adapter: no adapter registered for skill "${skill}"`);
+    for (const src of listFilesRecursive(`skills/${skill}`)) {
+      const rel = src.slice('skills/'.length);
+      let content = read(src);
+      if (rel === `${skill}/SKILL.md`) {
+        content = adapt(content).replace(/^(---\r?\n[\s\S]*?\r?\n---\r?\n)/, `$1\n${BANNER}\n`);
+      }
+      outputs[`omp/skills/${rel}`] = { content, mode: gitMode(join(ROOT, src)) };
+    }
+  }
+  return outputs;
+}
+
+// omp does not run Claude Code's shell hooks; an alwaysApply rule is injected
+// in full on every request, which is what the UserPromptSubmit hook achieves.
+function buildOmpRule(orchestrator) {
+  let body = mustReplace(orchestrator, 'before using Read/Grep/Edit/Bash yourself', 'before using read/grep/glob/edit/bash yourself');
+  body = mustReplace(body, 'Delegate via Task(subagent_type="lightstrator:<name>").', 'Delegate via the `task` tool with `agent: "<name>"`.');
+  return `---
+description: Lightstrator routing — delegate investigation, fixes, reviews and debugging to its sub-agents.
+alwaysApply: true
+---
+
+${BANNER}
+
+${body}
+`;
+}
+
 function build() {
   const pkg = readJson('package.json');
   const plugin = readJson('.claude-plugin/plugin.json');
   const marketplace = readJson('.claude-plugin/marketplace.json');
   const { version } = pkg;
 
+  const agents = readAgents();
   const context = buildContextFile({
     skills: listSkills(),
-    agents: readAgents(),
+    agents,
     orchestrator: readMessage('orchestrator'),
     planApproved: readMessage('plan-approved'),
   });
@@ -182,6 +327,13 @@ function build() {
     contextFileName: 'GEMINI.md',
   };
 
+  // omp prefers .omp-plugin/ over .claude-plugin/, so its catalog can point at
+  // the omp-native plugin tree while Claude Code keeps installing the root.
+  const ompMarketplace = {
+    ...marketplace,
+    plugins: marketplace.plugins.map((p) => (p.name === pkg.name ? { ...p, source: './omp' } : p)),
+  };
+
   const json = (obj) => JSON.stringify(obj, null, 2) + '\n';
 
   return {
@@ -193,23 +345,45 @@ function build() {
     '.codex-plugin/plugin.json': json(codexPlugin),
     '.codex/hooks.json': json(buildCodexHooks(readMessage('orchestrator'))),
     '.codex/config.toml': '[features]\nhooks = true\n',
+    '.omp-plugin/marketplace.json': json(ompMarketplace),
+    'omp/rules/lightstrator.md': buildOmpRule(readMessage('orchestrator')),
+    ...buildOmpSkills(),
+    ...buildOmpAgents(agents),
   };
 }
 
 const outputs = build();
 const stale = [];
 
-for (const [rel, content] of Object.entries(outputs)) {
+for (const [rel, output] of Object.entries(outputs)) {
+  const { content, mode } = typeof output === 'string' ? { content: output } : output;
   const path = join(ROOT, rel);
-  const current = existsSync(path) ? readFileSync(path, 'utf8') : null;
-  if (current === content) continue;
+  const exists = existsSync(path);
+  const sameContent = exists && readFileSync(path, 'utf8') === content;
+  const sameMode = mode === undefined || (exists && gitMode(path) === mode);
+  if (sameContent && sameMode) continue;
 
   if (CHECK) {
     stale.push(rel);
   } else {
     mkdirSync(dirname(path), { recursive: true });
     writeFileSync(path, content);
+    if (mode !== undefined) chmodSync(path, mode);
     console.log(`written: ${rel}`);
+  }
+}
+
+// omp/ is entirely generated: anything there that the build no longer produces
+// (a file deleted or renamed in the canonical source) would still ship.
+if (existsSync(join(ROOT, 'omp'))) {
+  for (const rel of listFilesRecursive('omp')) {
+    if (Object.hasOwn(outputs, rel)) continue;
+    if (CHECK) {
+      stale.push(`${rel} (orphan)`);
+    } else {
+      unlinkSync(join(ROOT, rel));
+      console.log(`removed: ${rel}`);
+    }
   }
 }
 

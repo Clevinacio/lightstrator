@@ -7,13 +7,13 @@ degrades and how to install on each one.
 
 ## Degradation matrix
 
-| Capability | Claude Code | Codex CLI | Gemini / Antigravity |
-| --- | --- | --- | --- |
-| Sub-agents | native `agents/*.md`, with their own model and tools | `## Personas` section in `AGENTS.md` — the model takes on the role inline | same, via `GEMINI.md` |
-| Skills | native `skills/`, loaded on demand | `.codex-plugin/plugin.json` → `"skills": "./skills/"` | `@import` at the top of `GEMINI.md` |
-| Orchestrator hook | `hooks/hooks.json`, reads the message from the file | `.codex/hooks.json`, message inline in the `echo` | no hooks — becomes fixed text in the context |
-| Plan-mode hook | `plan-mode-reminder.sh` reads `permission_mode` | no plan mode — omitted | omitted |
-| Statusline | `optional/statusline-limit.sh` | n/a | n/a |
+| Capability | Claude Code | Oh My Pi (omp) | Codex CLI | Gemini / Antigravity |
+| --- | --- | --- | --- | --- |
+| Sub-agents | native `agents/*.md`, with their own model and tools | native, from the generated plugin `omp/agents/`, with role models and context isolation | `## Personas` section in `AGENTS.md` — the model takes on the role inline | same, via `GEMINI.md` |
+| Skills | native `skills/`, loaded on demand | native, from `omp/skills/` (adapted copies), loaded on demand | `.codex-plugin/plugin.json` → `"skills": "./skills/"` | `@import` at the top of `GEMINI.md` |
+| Orchestrator hook | `hooks/hooks.json`, reads the message from the file | `alwaysApply` rule `omp/rules/lightstrator.md`, injected on every request | `.codex/hooks.json`, message inline in the `echo` | no hooks — becomes fixed text in the context |
+| Plan-mode hook | `plan-mode-reminder.sh` reads `permission_mode` | no hook — the `brainstorming`/`writing-plans` triggers and the orchestrator's "Executing an approved plan" section cover it | no plan mode — omitted | omitted |
+| Statusline | `optional/statusline-limit.sh` | n/a | n/a | n/a |
 
 What is lost most outside Claude Code is **context isolation**: with real
 sub-agents, `investigator` sweeps the codebase in a separate window and returns
@@ -48,6 +48,33 @@ imports the skills and carries the routing and the personas.
 
 Antigravity reads `AGENTS.md` — same content, generated in the same build.
 
+### Oh My Pi (omp)
+
+omp has native sub-agents with context isolation (via the `task` tool) and
+native skills, so nothing degrades into personas. It does not run Claude Code's
+shell hooks: the orchestrator message becomes an `alwaysApply` rule instead,
+which omp injects in full on every request.
+
+omp reads `.omp-plugin/marketplace.json` before `.claude-plugin/`, so the same
+repository serves both harnesses: Claude Code installs the root, omp installs
+the generated plugin under `omp/` — sub-agents (lowercase tools; `haiku` → role
+`@smol`, `sonnet`/`opus` → `@task`, `inherit` → no model line, so the parent's
+model is used), the three skills adapted to omp, and the rule.
+
+```
+/marketplace add JuliusBrussee/caveman
+/marketplace install caveman@caveman
+/marketplace add Clevinacio/lightstrator
+/marketplace install lightstrator@lightstrator
+```
+
+Same from a shell: `omp plugin marketplace add …` and `omp plugin install …`.
+Start a new session afterwards. To update, refresh the catalog and then upgrade
+(`upgrade` only acts when the catalog `version` changed):
+`/marketplace update lightstrator` then
+`/marketplace upgrade lightstrator@lightstrator`. Remove with
+`/marketplace uninstall lightstrator@lightstrator`.
+
 ## Generated files
 
 Do not edit by hand:
@@ -55,10 +82,13 @@ Do not edit by hand:
 ```
 AGENTS.md  GEMINI.md  gemini-extension.json
 .codex-plugin/plugin.json  .codex/hooks.json  .codex/config.toml
+.omp-plugin/marketplace.json
+omp/agents/*.md  omp/rules/lightstrator.md  omp/skills/**
 ```
 
 They all come out of `scripts/build.mjs` from the canonical source (`agents/`,
-`skills/`, `hooks/messages/`, `.claude-plugin/plugin.json`, `package.json`).
+`skills/`, `hooks/messages/`, `.claude-plugin/plugin.json`,
+`.claude-plugin/marketplace.json`, `package.json`).
 After touching any of those sources:
 
 ```bash
