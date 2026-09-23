@@ -66,38 +66,10 @@ Documentação: `README`, `CONTRIBUTING` e `docs/PREREQUISITES` têm par bilíng
 (`.md` em inglês, `.pt-BR.md` em português) e precisam ser atualizados juntos.
 `SECURITY.md` e `docs/PORTING.md` são só em inglês.
 
-Mensagens de commit em português, sem marcação de co-autoria de ferramenta, e
-com o prefixo Conventional Commits em inglês (`feat:`, `fix:`, `docs:`…) — é
-dele que sai a versão do release.
+Mensagens de commit em português, sem marcação de co-autoria de ferramenta.
 
 ## Pull requests
 
 Um assunto por PR. Descreva o comportamento antes e depois — para mudanças em
 prompt, diga qual gatilho passa a disparar ou deixa de disparar, já que não há
 teste automatizado que capture isso.
-
-## Releases
-
-Não edite `version` à mão. A cada push na `main`, o
-[release-please](https://github.com/googleapis/release-please) mantém aberto um
-PR de release com a próxima versão, calculada a partir dos commits desde o
-último release:
-
-| Commit | Bump |
-| --- | --- |
-| `fix:` | patch (`0.2.0` → `0.2.1`) |
-| `feat:` | minor (`0.2.0` → `0.3.0`) |
-| `feat!:` ou rodapé `BREAKING CHANGE:` | major |
-| `docs:`, `chore:`, `ci:`, `refactor:` … | nenhum |
-
-O PR de release sobe o `package.json` e todos os manifestos (`.claude-plugin/`,
-`.omp-plugin/`, `.codex-plugin/`, `gemini-extension.json`) e atualiza o
-`CHANGELOG.md`; a CI roda nele como em qualquer PR. É o `version` dos manifestos
-que o `/plugin update` e o `/marketplace upgrade` comparam, então uma mudança só
-chega a quem já instalou depois que o PR de release é mergeado — o que também
-cria a tag `vX.Y.Z` e o GitHub Release.
-
-A lista de arquivos versionados fica em `release-please-config.json` — um
-manifesto novo precisa entrar lá também. `CHANGELOG.md` e
-`.release-please-manifest.json` são mantidos pelo release-please; também não os
-edite.

@@ -4,8 +4,6 @@ on:
   push:
     branches: [main]
   pull_request:
-  # Dispatched by release-please.yml: its release PR does not trigger pull_request.
-  workflow_dispatch:
 
 # Without this the job inherits the repository default, which may be read/write.
 # CI only reads the checkout — nothing here needs to write to the repository.
