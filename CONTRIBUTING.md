@@ -67,10 +67,37 @@ Documentation: `README`, `CONTRIBUTING` and `docs/PREREQUISITES` have a
 bilingual pair (`.md` in English, `.pt-BR.md` in Portuguese) and must be updated
 together. `SECURITY.md` and `docs/PORTING.md` are English only.
 
-Commit messages are in Portuguese, with no tool co-authorship marker.
+Commit messages are in Portuguese, with no tool co-authorship marker, and keep
+the Conventional Commits prefix in English (`feat:`, `fix:`, `docs:`…) — the
+release version is computed from it.
 
 ## Pull requests
 
 One subject per PR. Describe the behavior before and after — for prompt changes,
 say which trigger starts or stops firing, since there is no automated test that
 captures it.
+
+## Releases
+
+Do not edit `version` by hand. On every push to `main`,
+[release-please](https://github.com/googleapis/release-please) keeps a release
+PR open with the next version, derived from the commits since the last release:
+
+| Commit | Bump |
+| --- | --- |
+| `fix:` | patch (`0.2.0` → `0.2.1`) |
+| `feat:` | minor (`0.2.0` → `0.3.0`) |
+| `feat!:` or a `BREAKING CHANGE:` footer | major |
+| `docs:`, `chore:`, `ci:`, `refactor:` … | none |
+
+The release PR bumps `package.json` and every manifest (`.claude-plugin/`,
+`.omp-plugin/`, `.codex-plugin/`, `gemini-extension.json`) and updates
+`CHANGELOG.md`; CI runs on it like on any PR. The manifests' `version` is what
+`/plugin update` and `/marketplace upgrade` compare, so a change reaches existing
+installs only once the release PR is merged, which also creates the `vX.Y.Z`
+tag and the GitHub Release.
+
+The list of versioned files lives in `release-please-config.json` — a new
+manifest must be added there too. `CHANGELOG.md` and
+`.release-please-manifest.json` are maintained by release-please; do not edit
+them either.
