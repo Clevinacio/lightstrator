@@ -59,7 +59,9 @@ omp reads `.omp-plugin/marketplace.json` before `.claude-plugin/`, so the same
 repository serves both harnesses: Claude Code installs the root, omp installs
 the generated plugin under `omp/` — sub-agents (lowercase tools; `haiku` → role
 `@smol`, `sonnet`/`opus` → `@task`, `inherit` → no model line, so the parent's
-model is used), the three skills adapted to omp, and the rule.
+model is used; `code-reviewer` is pinned to `@slow`, falling back to `@default`,
+so prewalk's switch to `@smol` does not weaken reviews), the three skills adapted
+to omp, and the rule.
 
 ```
 /marketplace add JuliusBrussee/caveman
