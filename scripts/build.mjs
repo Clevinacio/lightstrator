@@ -162,15 +162,21 @@ function mapOrThrow(map, key, what) {
 }
 
 const OMP_TOOLS = { Read: 'read', Grep: 'grep', Glob: 'glob', Edit: 'edit', Write: 'write', Bash: 'bash' };
-// null = no model line: omp then runs the agent on the parent's active model, like Claude's `inherit`.
-const OMP_MODELS = { haiku: '@smol', sonnet: '@task', opus: '@task', inherit: null };
+// Explicit per-agent model + thinking for omp. Bare model ids: omp resolves the
+// provider among the user's authenticated ones; unresolved → parent's model.
+const OMP_AGENT_MODELS = {
+  'code-reviewer': { model: 'claude-opus-5-5', thinking: 'high' },
+  debugger: { model: 'claude-sonnet-5', thinking: 'high' },
+  investigator: { model: 'claude-sonnet-5', thinking: 'high' },
+  'quick-fixer': { model: 'gemini-3.8-flash', thinking: 'high' },
+};
 // read-summarize: false makes omp's read return verbatim code instead of structural summaries.
 const OMP_AGENT_EXTRAS = { investigator: { 'read-summarize': 'false' } };
 
 function buildOmpAgents(agents) {
   const outputs = {};
   for (const a of agents) {
-    const { name, description, tools = '', model } = a.frontmatter;
+    const { name, description, tools = '' } = a.frontmatter;
     const ompTools = tools
       .split(',')
       .map((t) => mapOrThrow(OMP_TOOLS, t.trim(), 'tool'))
@@ -179,8 +185,8 @@ function buildOmpAgents(agents) {
       .map(([k, v]) => `\n${k}: ${v}`)
       .join('');
 
-    const ompModel = mapOrThrow(OMP_MODELS, model, 'model');
-    const modelLine = ompModel ? `\nmodel: "${ompModel}"` : '';
+    const { model, thinking } = mapOrThrow(OMP_AGENT_MODELS, name, 'agent');
+    const modelLine = `\nmodel: "${model}"\nthinking-level: ${thinking}`;
 
     outputs[`omp/agents/${a.file}`] = `---
 name: ${name}

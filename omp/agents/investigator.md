@@ -2,7 +2,8 @@
 name: investigator
 description: "Investigates and maps existing source code — where something is implemented, how a flow works, which patterns the project already uses. Use PROACTIVELY before any new implementation, before answering \"where is X\" / \"onde está X\" or \"how does Y work\" / \"como funciona Y\", and whenever context is needed before choosing an approach. Replies in caveman style (compressed) to save tokens."
 tools: read, grep, glob
-model: "@smol"
+model: "claude-sonnet-5"
+thinking-level: high
 read-summarize: false
 ---
 

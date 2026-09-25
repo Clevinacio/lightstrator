@@ -9,7 +9,7 @@ degrades and how to install on each one.
 
 | Capability | Claude Code | Oh My Pi (omp) | Codex CLI | Gemini / Antigravity |
 | --- | --- | --- | --- | --- |
-| Sub-agents | native `agents/*.md`, with their own model and tools | native, from the generated plugin `omp/agents/`, with role models and context isolation | `## Personas` section in `AGENTS.md` — the model takes on the role inline | same, via `GEMINI.md` |
+| Sub-agents | native `agents/*.md`, with their own model and tools | native, from the generated plugin `omp/agents/`, with pinned per-agent models and context isolation | `## Personas` section in `AGENTS.md` — the model takes on the role inline | same, via `GEMINI.md` |
 | Skills | native `skills/`, loaded on demand | native, from `omp/skills/` (adapted copies), loaded on demand | `.codex-plugin/plugin.json` → `"skills": "./skills/"` | `@import` at the top of `GEMINI.md` |
 | Orchestrator hook | `hooks/hooks.json`, reads the message from the file | `alwaysApply` rule `omp/rules/lightstrator.md`, injected on every request | `.codex/hooks.json`, message inline in the `echo` | no hooks — becomes fixed text in the context |
 | Plan-mode hook | `plan-mode-reminder.sh` reads `permission_mode` | no hook — the `brainstorming`/`writing-plans` triggers and the orchestrator's "Executing an approved plan" section cover it | no plan mode — omitted | omitted |
@@ -57,9 +57,11 @@ which omp injects in full on every request.
 
 omp reads `.omp-plugin/marketplace.json` before `.claude-plugin/`, so the same
 repository serves both harnesses: Claude Code installs the root, omp installs
-the generated plugin under `omp/` — sub-agents (lowercase tools; `haiku` → role
-`@smol`, `sonnet`/`opus` → `@task`, `inherit` → no model line, so the parent's
-model is used), the three skills adapted to omp, and the rule.
+the generated plugin under `omp/` — sub-agents (lowercase tools; models pinned
+per agent in `OMP_AGENT_MODELS`, all with `thinking-level: high`:
+`code-reviewer` → `claude-opus-5-5`, `debugger` and `investigator` →
+`claude-sonnet-5`, `quick-fixer` → `gemini-3.8-flash`), the three skills
+adapted to omp, and the rule.
 
 ```
 /marketplace add JuliusBrussee/caveman
