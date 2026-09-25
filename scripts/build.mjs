@@ -164,6 +164,11 @@ function mapOrThrow(map, key, what) {
 const OMP_TOOLS = { Read: 'read', Grep: 'grep', Glob: 'glob', Edit: 'edit', Write: 'write', Bash: 'bash' };
 // null = no model line: omp then runs the agent on the parent's active model, like Claude's `inherit`.
 const OMP_MODELS = { haiku: '@smol', sonnet: '@task', opus: '@task', inherit: null };
+// Per-agent role that wins over OMP_MODELS. code-reviewer is `inherit` in Claude Code,
+// but in omp that follows the parent's active model, which prewalk swaps to @smol,
+// so reviews would run on the weak model. @slow keeps them on a strong one; @default
+// (the user's main model, untouched by prewalk) covers an unassigned @slow.
+const OMP_AGENT_MODELS = { 'code-reviewer': '@slow, @default' };
 // read-summarize: false makes omp's read return verbatim code instead of structural summaries.
 const OMP_AGENT_EXTRAS = { investigator: { 'read-summarize': 'false' } };
 
@@ -179,7 +184,8 @@ function buildOmpAgents(agents) {
       .map(([k, v]) => `\n${k}: ${v}`)
       .join('');
 
-    const ompModel = mapOrThrow(OMP_MODELS, model, 'model');
+    const mappedModel = mapOrThrow(OMP_MODELS, model, 'model');
+    const ompModel = OMP_AGENT_MODELS[name] ?? mappedModel;
     const modelLine = ompModel ? `\nmodel: "${ompModel}"` : '';
 
     outputs[`omp/agents/${a.file}`] = `---
